@@ -44,7 +44,7 @@ This example demonstrates how to run Graviton workloads on EKS Auto Mode by conf
 First, we'll set up our EKS cluster using Terraform:
 
 ```bash
-cd EKS-Auto-Mode/terraform
+cd sample-aws-eks-auto-mode/terraform
 
 terraform init
 terraform apply -auto-approve
