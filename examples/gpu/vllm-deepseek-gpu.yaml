@@ -1,0 +1,84 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-deepseek-deployment
+  namespace: vllm-inference
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-deepseek-server
+  template:
+    metadata:
+      labels:
+        app: vllm-deepseek-server
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      automountServiceAccountToken: false
+      containers:
+      - name: inference-server
+        image: vllm/vllm-openai@sha256:bfb0403010061e61b692e337945fb9694baefb03b0725d62adab9cca6139ea62
+        imagePullPolicy: Always
+        securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - NET_RAW
+            seccompProfile:
+              type: RuntimeDefault
+        resources:
+          requests:
+            cpu: "40"
+            memory: "90Gi"
+            nvidia.com/gpu: 4 # 7B: 1 | 14B: 4 | 32B: 4 | 72B:
+          limits:
+            cpu: "48"
+            memory: "96Gi"
+            nvidia.com/gpu: 4 # 7B: 1 | 14B: 4 | 32B: 4 | 72B:
+
+        args:
+        - --model=$(MODEL_ID)
+        - --dtype=auto
+        - --enforce-eager
+        - --trust-remote-code
+        - --tensor-parallel-size=4 # Set to 8 to use all GPUs
+        - --gpu-memory-utilization=0.99
+        - --max-model-len=32768
+        env:
+        - name: MODEL_ID
+          value: deepseek-ai/DeepSeek-R1-Distill-Qwen-32B # 7B, 14B, 32B Works --> testing bigger sizes now
+        - name: PORT
+          value: "8000"
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
+        - mountPath: /secrets
+          name: hf-secret-volume
+          readOnly: true
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+      - name: hf-secret-volume
+        secret:
+          secretName: hf-secret
+      tolerations:
+        - key: nvidia.com/gpu
+          value: "true"
+          effect: "NoSchedule"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-service
+  namespace: vllm-inference
+spec:
+  selector:
+    app: vllm-deepseek-server
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
