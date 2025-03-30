@@ -17,3 +17,10 @@ resource "local_file" "setup_gpu" {
   })
   filename = "${path.module}/../nodepools/gpu-nodepool.yaml"
 }
+
+resource "local_file" "setup_neuron" {
+  content = templatefile("${path.module}/../nodepool-templates/neuron-nodepool.yaml.tpl", {
+    node_iam_role_name  = module.eks.node_iam_role_name
+  })
+  filename = "${path.module}/../nodepools/neuron-nodepool.yaml"
+}
