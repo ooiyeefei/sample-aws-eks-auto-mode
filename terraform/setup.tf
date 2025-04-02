@@ -11,6 +11,13 @@ resource "local_file" "setup_graviton" {
   filename = "${path.module}/../nodepools/graviton-nodepool.yaml"
 }
 
+resource "local_file" "setup_spot" {
+  content = templatefile("${path.module}/../nodepool-templates/spot-nodepool.yaml.tpl", {
+    node_iam_role_name  = module.eks.node_iam_role_name
+  })
+  filename = "${path.module}/../nodepools/spot-nodepool.yaml"
+}
+
 resource "local_file" "setup_gpu" {
   content = templatefile("${path.module}/../nodepool-templates/gpu-nodepool.yaml.tpl", {
     node_iam_role_name  = module.eks.node_iam_role_name
