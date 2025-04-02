@@ -46,17 +46,17 @@ This repository provides a production-ready template for deploying various workl
 1. **Clone Repository**:
 ```bash
 # Get the code
-git clone git@ssh.gitlab.aws.dev:utkarpun/EKS-Auto-Mode.git
-cd EKS-Auto-Mode
+git clone https://github.com/aws-samples/sample-aws-eks-auto-mode.git
+cd sample-aws-eks-auto-mode
 
 # Configure remote
-git remote set-url origin git@ssh.gitlab.aws.dev:utkarpun/EKS-Auto-Mode.git
+git remote set-url origin https://github.com/aws-samples/sample-aws-eks-auto-mode.git
 ```
 
 2. **Deploy Cluster**:
 ```bash
 # Navigate to Terraform directory
-cd EKS-Auto-Mode/terraform
+cd sample-aws-eks-auto-mode/terraform
 
 # Initialize and apply Terraform
 terraform init
