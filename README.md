@@ -66,7 +66,7 @@ terraform apply -auto-approve
 $(terraform output -raw configure_kubectl)
 ```
 
-## Architecture
+## Components
 
 ### 🔄 NodePools
 EKS Auto Mode leverages [Karpenter](https://karpenter.sh/docs/) for intelligent node management:
