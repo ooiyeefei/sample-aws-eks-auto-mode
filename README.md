@@ -79,6 +79,7 @@ EKS Auto Mode leverages [Karpenter](https://karpenter.sh/docs/) for intelligent 
 📦 **Preconfigured NodePools**
 In these samples we configure the following Nodepools for you:
 - ARM64-optimized Graviton nodes
+- EC2 Spot nodes
 - GPU-accelerated compute nodes
 - Inferentia2 ML inference nodes
 
@@ -111,6 +112,12 @@ EKS Auto Mode automates load balancer setup with AWS best practices:
 🎮 [Running Graviton Workloads](examples/graviton/)
 - Cost-effective ARM64 deployments
 - Optimized performance
+- Example: 2048 game application
+
+### Fault Tolerant Applications
+🎮 [Running Spot Workloads](examples/spot/)
+- Cost-effective deployments
+- Diverse and flexible compute choices
 - Example: 2048 game application
 
 ### GPU Applications
