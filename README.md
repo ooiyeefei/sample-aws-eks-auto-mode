@@ -115,7 +115,7 @@ EKS Auto Mode automates load balancer setup with AWS best practices:
 - Example: 2048 game application
 
 ### Fault Tolerant Applications
-🎮 [Running Spot Workloads](examples/spot/)
+💰 [Running Spot Workloads](examples/spot/)
 - Cost-effective deployments
 - Diverse and flexible compute choices
 - Example: 2048 game application
