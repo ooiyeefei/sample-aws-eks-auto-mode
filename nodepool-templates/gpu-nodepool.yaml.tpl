@@ -10,7 +10,7 @@ spec:
         karpenter.sh/discovery: "automode-demo"
   securityGroupSelectorTerms:
     - tags:
-        kubernetes.io/cluster/automode-cluster: owned
+        aws:eks:cluster-name: ${cluster_name}
   tags:
     karpenter.sh/discovery: "automode-demo"
 ---

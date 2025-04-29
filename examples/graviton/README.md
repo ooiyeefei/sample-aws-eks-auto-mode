@@ -100,31 +100,7 @@ Set up the Application Load Balancer using Ingress:
 kubectl apply -f 2048-ingress.yaml
 ```
 
-### 5. Configure Security Groups
-Configure security group rules to allow communication between the ALB and EKS cluster:
-
-```bash
-# Set AWS region
-aws configure set region us-west-2
-
-# Get security group IDs
-ALB_SG=$(aws elbv2 describe-load-balancers \
-  --query 'LoadBalancers[?contains(DNSName, `game2048`)].SecurityGroups[0]' \
-  --output text)
-EKS_SG=$(aws eks describe-cluster \
-  --name automode-cluster \
-  --query 'cluster.resourcesVpcConfig.clusterSecurityGroupId' \
-  --output text)
-
-# Allow ALB to communicate with EKS cluster
-aws ec2 authorize-security-group-ingress \
-  --group-id $EKS_SG \
-  --source-group $ALB_SG \
-  --protocol tcp \
-  --port 80
-```
-
-### 6. Access the Application
+### 5. Access the Application
 After the ALB is provisioned (usually takes 5-10 minutes):
 
 1. Get the ALB hostname:

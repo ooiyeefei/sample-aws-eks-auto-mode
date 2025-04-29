@@ -114,7 +114,7 @@ After the ALB is provisioned (usually takes 5-10 minutes):
 ```bash
 kubectl get ingress ingress-2048 \
   -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' \
-  -n game-2048
+  -n game-2048-spot
 ```
 
 2. Open the URL in your browser to play the 2048 game! 🎮

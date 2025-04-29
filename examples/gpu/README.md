@@ -177,6 +177,8 @@ kubectl get service open-webui-service \
 ```
 
 2. Open the URL in your browser to interact with the model! 🤖
+> ⚠️ **Select a Model**: If you are unable to select a model, it means the model is still being downloaded as is not yet being served by our inferencing server pod. Just refresh until you see a model available.
+
 
 ## Cleanup
 

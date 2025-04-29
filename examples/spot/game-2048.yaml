@@ -2,12 +2,12 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: game-2048
+  name: game-2048-spot
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: game-2048
+  namespace: game-2048-spot
   name: deployment-2048
 spec:
   selector:

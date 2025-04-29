@@ -56,7 +56,7 @@ git remote set-url origin https://github.com/aws-samples/sample-aws-eks-auto-mod
 2. **Deploy Cluster**:
 ```bash
 # Navigate to Terraform directory
-cd sample-aws-eks-auto-mode/terraform
+cd terraform
 
 # Initialize and apply Terraform
 terraform init
@@ -85,6 +85,28 @@ In these samples we configure the following Nodepools for you:
 
 > 📘 **Note**: Check [NodePool Templates](/nodepool-templates) for detailed configurations.
 
+
+### 🛠️ NodeClass Configuration
+EKS Auto Mode uses [NodeClass](https://docs.aws.amazon.com/eks/latest/userguide/create-node-class.html) for granular control over infrastructure-level settings:
+
+⚙️ **Customization Options**
+- Subnet selection for node placement
+- Security group configuration
+- Ephemeral storage settings
+- Network policies and SNAT configuration
+- Custom tagging for resource management
+
+📦 **Implementation Approach**
+In these samples, we create a custom NodeClass for each example workload type:
+- Each NodeClass is defined in the same file as its corresponding NodePool
+- Custom NodeClasses are only needed for specific infrastructure customizations
+- For most use cases, the default NodeClass works best with EKS Auto Mode
+
+> ⚠️ **Important**: When creating custom NodeClasses, be aware of these considerations:
+> - If you change the Node IAM Role, you'll need to create a new Access Entry
+> - Custom NodeClasses may require additional configuration to work properly with EKS Auto Mode
+> - Do not name your custom NodeClass "default" as this is reserved
+
 ### 🌐 Load Balancer Configuration
 EKS Auto Mode automates load balancer setup with AWS best practices:
 
@@ -103,6 +125,23 @@ EKS Auto Mode automates load balancer setup with AWS best practices:
 > - Private subnets: `kubernetes.io/role/internal-elb: "1"`
 > 
 > Our Terraform code automatically creates these necessary subnet tags, but you may need to add them manually if using custom networking configurations.
+
+### 💾 EBS CSI Driver Configuration
+EKS Auto Mode automates persistent storage setup with Amazon EBS:
+
+1. 🔹 **Automated Storage Management**
+   - No need to install the EBS CSI controller on EKS Auto Mode clusters
+   - [AWS Documentation](https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html)
+
+2. 🔸 **Storage Classes and PVCs**
+   - Native Kubernetes storage integration
+   - Optimized for various workload requirements
+   - Example: [Neuron Model Storage Class](/examples/neuron/pvc.yaml)
+
+> **Important**: The EBS CSI driver requires specific IAM permissions to make calls to AWS APIs. EKS Auto Mode simplifies this setup, but you should be aware of the following:
+> - Only platform versions created from a storage class using `ebs.csi.eks.amazonaws.com` as the provisioner can be mounted on nodes created by EKS Auto Mode
+> - Existing platform versions must be migrated to the new storage class using a volume snapshot
+> - For custom KMS key encryption, additional IAM permissions may be required
 
 ## Examples
 
