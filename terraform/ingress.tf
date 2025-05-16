@@ -80,7 +80,7 @@ resource "kubernetes_ingress_v1" "jupyter_ingress" {
   
   metadata {
     name      = "jupyter-ingress"
-    namespace = kubernetes_namespace.ingress_nginx.metadata[0].name
+    namespace = "vcluster-small"
     annotations = {
       # Health check settings for the ALB
       "alb.ingress.kubernetes.io/healthcheck-port": "8888",
@@ -89,9 +89,9 @@ resource "kubernetes_ingress_v1" "jupyter_ingress" {
       "alb.ingress.kubernetes.io/success-codes": "200-399",
       "alb.ingress.kubernetes.io/target-type": "ip",
       
-      # TLS and security settings
-      "alb.ingress.kubernetes.io/listen-ports": "[{\"HTTP\": 80}, {\"HTTPS\": 443}]",
-      "alb.ingress.kubernetes.io/ssl-redirect": "443",
+      # TLS and security settings - modified for HTTP only
+      "alb.ingress.kubernetes.io/listen-ports": "[{\"HTTP\": 80}]",
+      # Removed SSL redirect
       
       # Optional: increase timeout for Jupyter operations
       "alb.ingress.kubernetes.io/load-balancer-attributes": "idle_timeout.timeout_seconds=600"
@@ -101,11 +101,6 @@ resource "kubernetes_ingress_v1" "jupyter_ingress" {
   spec {
     ### Explicitly set the ingress class name to alb
     ingress_class_name = "alb"
-    
-    tls {
-      hosts       = ["jupyter-test-pkvrnvm.paas.dev.rafay-edge.net"]
-      secret_name = "jupyter-test-notebook-tls-x-jupyter-test-x-vcluster-small"
-    }
     
     rule {
       host = "jupyter-test-pkvrnvm.paas.dev.rafay-edge.net"
