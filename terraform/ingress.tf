@@ -74,3 +74,54 @@ resource "kubernetes_config_map" "ingress_controller_info" {
   
   depends_on = [kubernetes_namespace.ingress_nginx]
 }
+
+# Patch the Rafay-created ingress to use ALB instead of NGINX
+resource "kubernetes_manifest" "patch_rafay_ingress" {
+  provider = kubernetes.eks_cluster
+  
+  manifest = {
+    apiVersion = "networking.k8s.io/v1"
+    kind       = "Ingress"
+    metadata = {
+      name      = "jupyter-test-notebook-x-jupyter-test-x-vcluster-small"
+      namespace = "vcluster-small"
+      annotations = {
+        "kubernetes.io/ingress.class"                 = "alb"
+        "alb.ingress.kubernetes.io/healthcheck-path"  = "/api"
+        "alb.ingress.kubernetes.io/healthcheck-port"  = "8888"
+        "alb.ingress.kubernetes.io/target-type"       = "ip"
+        "alb.ingress.kubernetes.io/listen-ports"      = "[{\"HTTP\": 80}]"
+        "alb.ingress.kubernetes.io/success-codes"     = "200-399"
+        "cert-manager.io/cluster-issuer"              = "letsencrypt-demo"
+        "kubernetes.io/tls-acme"                      = "true"
+        "nginx.ingress.kubernetes.io/proxy-body-size" = "50m"
+      }
+      labels = {
+        "vcluster.loft.sh/managed-by" = "vcluster-small"
+        "vcluster.loft.sh/namespace"  = "jupyter-test"
+      }
+    }
+    spec = {
+      ingressClassName = "alb"
+      rules = [{
+        host = "jupyter-test-pkvrnvm.paas.dev.rafay-edge.net"
+        http = {
+          paths = [{
+            path     = "/"
+            pathType = "Prefix"
+            backend = {
+              service = {
+                name = "jupyter-test-notebook-x-jupyter-test-x-vcluster-small"
+                port = {
+                  number = 8888
+                }
+              }
+            }
+          }]
+        }
+      }]
+    }
+  }
+  
+  depends_on = [kubernetes_ingress_class_v1.alb]
+}
