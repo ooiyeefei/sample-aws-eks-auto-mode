@@ -74,3 +74,42 @@ resource "kubernetes_config_map" "ingress_controller_info" {
   
   depends_on = [kubernetes_namespace.ingress_nginx]
 }
+
+resource "kubernetes_ingress_v1" "jupyter_ingress" {
+  provider = kubernetes.eks_cluster
+  
+  metadata {
+    name      = "jupyter-ingress"
+    namespace = kubernetes_namespace.ingress_nginx.metadata[0].name
+  }
+  
+  spec {
+    ### Explicitly set the ingress class name to alb
+    ingress_class_name = "alb"
+    
+    tls {
+      hosts       = ["jupyter-test-pkvrnvm.paas.dev.rafay-edge.net"]
+      secret_name = "jupyter-test-notebook-tls-x-jupyter-test-x-vcluster-small"
+    }
+    
+    rule {
+      host = "jupyter-test-pkvrnvm.paas.dev.rafay-edge.net"
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "jupyter-test-notebook-x-jupyter-test-x-vcluster-small"
+              port {
+                number = 8888
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  depends_on = [kubernetes_ingress_class_v1.alb, kubernetes_namespace.ingress_nginx]
+}
