@@ -84,7 +84,7 @@ resource "kubernetes_ingress_v1" "jupyter_ingress" {
     annotations = {
       # Health check settings for the ALB
       "alb.ingress.kubernetes.io/healthcheck-port": "8888",
-      "alb.ingress.kubernetes.io/healthcheck-path": "/api/health",
+      "alb.ingress.kubernetes.io/healthcheck-path": "/api",
       "alb.ingress.kubernetes.io/healthcheck-protocol": "HTTP",
       "alb.ingress.kubernetes.io/success-codes": "200-399",
       "alb.ingress.kubernetes.io/target-type": "ip",
