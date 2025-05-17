@@ -122,6 +122,10 @@ resource "kubernetes_manifest" "patch_rafay_ingress" {
       }]
     }
   }
+
+  field_manager {
+    force_conflicts = true
+  }
   
   depends_on = [kubernetes_ingress_class_v1.alb]
 }
