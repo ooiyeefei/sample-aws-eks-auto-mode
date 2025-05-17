@@ -95,7 +95,7 @@ resource "kubernetes_manifest" "patch_rafay_ingress" {
         "alb.ingress.kubernetes.io/healthcheck-port"  = "8888"
         "alb.ingress.kubernetes.io/target-type"       = "ip"
         "alb.ingress.kubernetes.io/listen-ports"      = "[{\"HTTP\": 80}]"
-        "alb.ingress.kubernetes.io/success-codes"     = "399,404"
+        "alb.ingress.kubernetes.io/success-codes"     = "200-399,404"
         "cert-manager.io/cluster-issuer"              = "letsencrypt-demo"
         "kubernetes.io/tls-acme"                      = "true"
         "nginx.ingress.kubernetes.io/proxy-body-size" = "50m"
