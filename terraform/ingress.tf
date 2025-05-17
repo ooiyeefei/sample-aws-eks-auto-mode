@@ -75,6 +75,10 @@ resource "kubernetes_config_map" "ingress_controller_info" {
   depends_on = [kubernetes_namespace.ingress_nginx]
 }
 
+data "external" "vcluster_service_name" {
+  program = ["bash", "-c", "kubectl get ingress -n vcluster-small jupyter-test-notebook-x-jupyter-test-x-vcluster-small -o jsonpath='{\"service_name\": \"{.spec.rules[0].http.paths[0].backend.service.name}\"}' 2>/dev/null || echo '{\"service_name\": \"jupyter-test-notebook-x-jupyter-test-x-vcluster-smal-ccf2b76dd0\"}'"]
+}
+
 # Patch the Rafay-created ingress to use ALB instead of NGINX
 resource "kubernetes_manifest" "patch_rafay_ingress" {
   provider = kubernetes.eks_cluster
@@ -111,7 +115,7 @@ resource "kubernetes_manifest" "patch_rafay_ingress" {
             pathType = "Prefix"
             backend = {
               service = {
-                name = "jupyter-test-notebook-x-jupyter-test-x-vcluster-small"
+                name = data.external.vcluster_service_name.result.service_name
                 port = {
                   number = 8888
                 }
