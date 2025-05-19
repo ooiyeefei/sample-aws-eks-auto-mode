@@ -50,6 +50,8 @@ cd sample-aws-eks-auto-mode
 
 # Configure remote
 git remote set-url origin https://github.com/aws-samples/sample-aws-eks-auto-mode.git
+
+git checkout cgk
 ```
 
 2. **Deploy Cluster**:
