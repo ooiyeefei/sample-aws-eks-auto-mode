@@ -35,3 +35,19 @@ resource "local_file" "setup_neuron" {
   })
   filename = "${path.module}/../nodepools/neuron-nodepool.yaml"
 }
+
+resource "local_file" "setup_openwebui_values" {
+  content = templatefile("${path.module}/../setup-openwebui/values.yaml.tpl", {
+    s3_bucket_name = aws_s3_bucket.openwebui_docs.id
+    region         = var.region
+    rds_endpoint   = aws_db_instance.postgres.endpoint
+  })
+  filename = "${path.module}/../setup-openwebui/values.yaml"
+}
+
+resource "local_file" "setup_openwebui_secret" {
+  content = templatefile("${path.module}/../setup-openwebui/secret.yaml.tpl", {
+    rds_endpoint   = aws_db_instance.postgres.endpoint
+  })
+  filename = "${path.module}/../setup-openwebui/secret.yaml"
+}

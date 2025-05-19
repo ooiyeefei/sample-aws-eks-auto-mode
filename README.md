@@ -4,6 +4,8 @@
 - [Overview](#overview)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
+- [Setup Open Webui](#setup-open-webui)
+- [PostgreSQL with pg_vector](#postgresql-with-pg_vector)
 - [Cleanup](#cleanup)
 - [Contributing](#contributing)
 - [License and Disclaimer](#license-and-disclaimer)
@@ -62,6 +64,71 @@ terraform apply -auto-approve
 # Configure kubectl
 $(terraform output -raw configure_kubectl)
 ```
+
+## Setup Open Webui
+
+Proceed over to [setup-open-webui](./setup-openwebui/)
+
+## PostgreSQL with pg_vector
+
+This project includes an RDS PostgreSQL instance with pg_vector extension for vector database capabilities.
+
+### RDS PostgreSQL Setup
+
+The deployment includes:
+- PostgreSQL 15.3 with pg_vector extension
+- Multi-AZ deployment for high availability
+- Encrypted storage with autoscaling
+- Deployed in private subnets for security
+
+### Post-Deployment Steps
+
+After the infrastructure is deployed, follow these steps to complete the pg_vector setup:
+
+1. **Get the RDS endpoint**:
+```bash
+# Navigate to Terraform directory
+cd terraform
+
+# Get the RDS endpoint
+terraform output rds_endpoint
+```
+
+2. **Connect to the PostgreSQL database**:
+```bash
+# Install PostgreSQL client if needed
+sudo apt-get update && sudo apt-get install -y postgresql-client
+
+# Connect to the database (replace with your actual endpoint)
+psql -h <rds_endpoint> -U postgres -d vectordb
+# Enter the password when prompted (default: YourStrongPasswordHere)
+```
+
+3. **Create the pg_vector extension**:
+```sql
+-- Once connected to PostgreSQL, run:
+CREATE EXTENSION vector;
+
+-- Verify the extension is installed
+\dx
+```
+
+4. **Test the vector functionality**:
+```sql
+-- Create a test table with vector data
+CREATE TABLE items (
+  id serial PRIMARY KEY,
+  embedding vector(3)
+);
+
+-- Insert some test vectors
+INSERT INTO items (embedding) VALUES ('[1,2,3]'), ('[4,5,6]'), ('[7,8,9]');
+
+-- Query using vector similarity
+SELECT * FROM items ORDER BY embedding <-> '[3,1,2]' LIMIT 5;
+```
+
+> **Security Note**: For production use, change the default password using AWS Secrets Manager or SSM Parameter Store.
 
 ## Cleanup
 
