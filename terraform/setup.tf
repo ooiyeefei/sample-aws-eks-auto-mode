@@ -37,7 +37,7 @@ resource "local_file" "setup_neuron" {
 }
 
 resource "local_file" "setup_openwebui_values" {
-  content = templatefile("${path.module}/../setup-openwebui/values.yaml.tpl", {
+  content = templatefile("${path.module}/../setup-openwebui/templates/values.yaml.tpl", {
     s3_bucket_name = aws_s3_bucket.openwebui_docs.id
     region         = var.region
     rds_endpoint   = aws_db_instance.postgres.endpoint
@@ -46,8 +46,15 @@ resource "local_file" "setup_openwebui_values" {
 }
 
 resource "local_file" "setup_openwebui_secret" {
-  content = templatefile("${path.module}/../setup-openwebui/secret.yaml.tpl", {
+  content = templatefile("${path.module}/../setup-openwebui/templates/secret.yaml.tpl", {
     rds_endpoint   = aws_db_instance.postgres.endpoint
   })
   filename = "${path.module}/../setup-openwebui/secret.yaml"
+}
+
+resource "local_file" "setup_pgvector_job" {
+  content = templatefile("${path.module}/../setup-openwebui/templates/pgvector-job.yaml.tpl", {
+    rds_endpoint   = aws_db_instance.postgres.endpoint
+  })
+  filename = "${path.module}/../setup-openwebui/pgvector-job.yaml"
 }

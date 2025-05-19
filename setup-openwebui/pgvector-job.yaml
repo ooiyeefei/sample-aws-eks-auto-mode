@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pgvector-setup
+  namespace: vllm-inference
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      containers:
+      - name: pgvector-setup
+        image: postgres:15
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e  # Exit immediately if a command exits with a non-zero status
+          
+          echo "=== [$(date)] STARTING PGVECTOR SETUP ==="
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 10
+          
+          # Parse the endpoint to get hostname and port separately
+          ENDPOINT="automode-cluster-postgres.cpwyyc64kl6e.ap-southeast-3.rds.amazonaws.com:5432"
+          HOSTNAME=$(echo $ENDPOINT | cut -d':' -f1)
+          PORT=$(echo $ENDPOINT | cut -d':' -f2)
+          
+          echo "=== [$(date)] CONNECTING TO POSTGRESQL ==="
+          echo "Host: $HOSTNAME"
+          echo "Port: $PORT"
+          echo "Database: vectordb"
+          
+          # Test connection first
+          if ! PGPASSWORD="YourStrongPasswordHere" psql -h $HOSTNAME -p $PORT -U postgres -d vectordb -c "SELECT 1" > /dev/null 2>&1; then
+            echo "=== [$(date)] ERROR: FAILED TO CONNECT TO POSTGRESQL ==="
+            echo "Please check that the RDS instance is running and accessible from the EKS cluster."
+            exit 1
+          fi
+          
+          echo "=== [$(date)] CONNECTION SUCCESSFUL ==="
+          echo "Creating pgvector extension..."
+          
+          # Create the extension
+          if PGPASSWORD="YourStrongPasswordHere" psql -h $HOSTNAME -p $PORT -U postgres -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"; then
+            echo "=== [$(date)] PGVECTOR EXTENSION CREATED SUCCESSFULLY ==="
+          else
+            echo "=== [$(date)] ERROR: FAILED TO CREATE PGVECTOR EXTENSION ==="
+            exit 1
+          fi
+          
+          # Verify the extension
+          echo "=== [$(date)] VERIFYING PGVECTOR EXTENSION ==="
+          if PGPASSWORD="YourStrongPasswordHere" psql -h $HOSTNAME -p $PORT -U postgres -d vectordb -c "SELECT extname, extversion FROM pg_extension WHERE extname = 'vector';"; then
+            echo "=== [$(date)] VERIFICATION SUCCESSFUL ==="
+            echo "=== [$(date)] PGVECTOR SETUP COMPLETED SUCCESSFULLY ==="
+          else
+            echo "=== [$(date)] ERROR: VERIFICATION FAILED ==="
+            exit 1
+          fi
+      restartPolicy: Never
+  backoffLimit: 4

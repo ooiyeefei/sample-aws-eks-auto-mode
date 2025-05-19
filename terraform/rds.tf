@@ -34,7 +34,7 @@ resource "aws_db_subnet_group" "rds" {
   }
 }
 
-# DB Parameter Group for pg_vector
+# DB Parameter Group for PostgreSQL
 resource "aws_db_parameter_group" "postgres_vector" {
   name        = "${var.name}-postgres-vector"
   family      = "postgres15"
@@ -42,7 +42,7 @@ resource "aws_db_parameter_group" "postgres_vector" {
 
   parameter {
     name  = "shared_preload_libraries"
-    value = "pg_stat_statements,pg_vector"
+    value = "pg_stat_statements"
   }
 
   tags = {
@@ -54,7 +54,7 @@ resource "aws_db_parameter_group" "postgres_vector" {
 resource "aws_db_instance" "postgres" {
   identifier             = "${var.name}-postgres"
   engine                 = "postgres"
-  engine_version         = "15.3"
+  engine_version         = "15.13"
   instance_class         = "db.t3.medium"
   allocated_storage      = 20
   max_allocated_storage  = 100
@@ -90,3 +90,6 @@ output "rds_endpoint" {
   description = "The connection endpoint for the PostgreSQL instance"
   value       = aws_db_instance.postgres.endpoint
 }
+
+# Note: The pgvector extension needs to be created manually after the RDS instance is deployed.
+# See the "PostgreSQL with pg_vector" section in the README.md file for instructions.

@@ -7,11 +7,12 @@ persistence:
   s3:
     bucket: "${s3_bucket_name}"
     region: "${region}"
+    endpointUrl: "https://s3.${region}.amazonaws.com"
 
 # Configure service account for Pod Identity
 serviceAccount:
   enable: true
-  name: "open-webui"  # Must match the service_account in the Pod Identity association
+  name: "open-webui-pia"  # Must match the service_account in the Pod Identity association
 
 # Configure environment variables
 extraEnvVars:
@@ -24,11 +25,8 @@ extraEnvVars:
   - name: "VECTOR_DB"
     value: "pgvector"
   
-  # vLLM configuration
-  - name: "OPENAI_API_BASE_URL"
-    value: "http://vllm-service/v1"
-  - name: "OPENAI_API_KEY"
-    value: "not-needed"  # vLLM typically doesn't require an API key in internal deployments
+
+openaiBaseApiUrls: ["http://vllm-service/v1", "http://open-webui-pipelines.vllm-inference.svc.cluster.local:9099"]
 
 # Disable the embedded Ollama chart
 ollama:
