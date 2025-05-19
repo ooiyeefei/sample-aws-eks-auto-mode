@@ -45,13 +45,8 @@ This repository provides a production-ready template for deploying various workl
 1. **Clone Repository**:
 ```bash
 # Get the code
-git clone https://github.com/aws-samples/sample-aws-eks-auto-mode.git
+git clone -b cgk https://github.com/aws-samples/sample-aws-eks-auto-mode.git
 cd sample-aws-eks-auto-mode
-
-# Configure remote
-git remote set-url origin https://github.com/aws-samples/sample-aws-eks-auto-mode.git
-
-git checkout cgk
 ```
 
 2. **Deploy Cluster**:
@@ -66,10 +61,6 @@ terraform apply -auto-approve
 # Configure kubectl
 $(terraform output -raw configure_kubectl)
 ```
-
-## Setup Open Webui
-
-Proceed over to [setup-open-webui](./setup-openwebui/)
 
 ## PostgreSQL with pg_vector
 
@@ -131,6 +122,10 @@ SELECT * FROM items ORDER BY embedding <-> '[3,1,2]' LIMIT 5;
 ```
 
 > **Security Note**: For production use, change the default password using AWS Secrets Manager or SSM Parameter Store.
+
+## Setup Open Webui
+
+Proceed over to [setup-open-webui](./setup-openwebui/)
 
 ## Cleanup
 
