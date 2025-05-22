@@ -40,3 +40,4 @@ terraform.rc
 nodepools/
 **/values.yaml
 **/secret.yaml
+**/pgvector-job.yaml
