@@ -66,9 +66,10 @@ $(terraform output -raw configure_kubectl)
 This project includes an OpenWebUI deployment that uses:
 - S3 for document storage
 - RDS PostgreSQL with pgvector for vector embeddings
+- AWS Secrets Manager for secure credential management
 - Optional vLLM service for LLM inference
 
-The setup process includes automated creation of the pgvector extension through a Kubernetes Job, eliminating the need for manual database configuration.
+The setup process includes automated creation of the pgvector extension through a Kubernetes Job, eliminating the need for manual database configuration. Database credentials are securely managed using AWS Secrets Manager and the External Secrets Operator, following security best practices.
 
 For detailed setup instructions, proceed to [setup-openwebui](./setup-openwebui/)
 

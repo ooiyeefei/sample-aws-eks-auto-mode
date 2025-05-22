@@ -21,11 +21,18 @@ cd ../setup-openwebui
 kubectl apply -f sc.yaml
 ```
 
-### 2. Apply Database Secret
+### 2. Apply Namespace, ClusterSecretStore, and External Secret
 ```bash
 kubectl apply -f namespace.yaml
+
+# Apply the ClusterSecretStore to configure AWS Secrets Manager access
+kubectl apply -f cluster-secret-store.yaml
+
+# Apply the External Secret to fetch credentials from AWS Secrets Manager
 kubectl apply -f secret.yaml
 ```
+
+> **Note**: The ClusterSecretStore configures access to AWS Secrets Manager, and the External Secret will automatically fetch the database credentials. This approach eliminates hardcoded credentials and follows security best practices.
 
 ### 3. Create the pgvector Extension
 ```bash
@@ -129,18 +136,62 @@ extraEnvVars:
     value: "pgvector"
 ```
 
-The database connection string is stored in a Kubernetes secret (`openwebui-db-credentials`) that points to the RDS instance created by Terraform.
+The database connection string is stored in a Kubernetes secret (`openwebui-db-credentials`) that is managed by External Secrets Operator and populated from AWS Secrets Manager.
+
+### AWS Secrets Manager Integration
+
+This deployment uses AWS Secrets Manager to securely store and manage database credentials:
+
+- **No Hardcoded Credentials**: Database passwords are generated randomly and stored securely in AWS Secrets Manager
+- **External Secrets Operator**: Automatically syncs credentials from AWS Secrets Manager to Kubernetes Secrets
+- **Secure Access**: Uses EKS Pod Identity for secure, IAM-based access to secrets
+- **Credential Rotation**: Supports future credential rotation without application changes
+
+The External Secrets Operator creates a Kubernetes Secret from the AWS Secrets Manager secret:
+
+```yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: postgres-external-secret
+  namespace: vllm-inference
+spec:
+  refreshInterval: "15m"
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: ClusterSecretStore
+  target:
+    name: openwebui-db-credentials
+    creationPolicy: Owner
+  data:
+  - secretKey: url
+    remoteRef:
+      key: "automode-cluster-postgres-credentials"
+      property: connectionString
+```
+
+This approach follows security best practices by eliminating hardcoded credentials and centralizing credential management.
 
 ## Accessing Open WebUI
 
-After deployment, you can access Open WebUI at:
+After deployment, you can access Open WebUI through the Network Load Balancer:
+
 ```bash
-export LOCAL_PORT=8080
-export POD_NAME=$(kubectl get pods -n vllm-inference -l "app.kubernetes.io/component=open-webui" -o jsonpath="{.items[0].metadata.name}")
-export CONTAINER_PORT=$(kubectl get pod -n vllm-inference $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-echo "Visit http://127.0.0.1:$LOCAL_PORT to use your application"
-kubectl -n vllm-inference port-forward $POD_NAME $LOCAL_PORT:$CONTAINER_PORT
+# Apply the load balancer configuration
+kubectl apply -f lb.yaml
 ```
+
+Will take a while for the Load Balancer to be provisioned. Can get the URL below:
+
+```bash
+# Get the load balancer URL
+export LB_URL=$(kubectl get service open-webui-service -n vllm-inference -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+
+# Display the URL
+echo "Open WebUI is available at: http://$LB_URL"
+```
+
+The load balancer may take a few minutes to provision and become available. Once ready, you can access Open WebUI by opening the URL in your browser.
 
 ## Verification Steps
 

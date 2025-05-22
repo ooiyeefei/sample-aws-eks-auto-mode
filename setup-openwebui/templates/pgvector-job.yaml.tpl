@@ -10,6 +10,12 @@ spec:
       containers:
       - name: pgvector-setup
         image: postgres:15
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: openwebui-db-credentials
+              key: url
         command:
         - /bin/bash
         - -c
@@ -20,18 +26,20 @@ spec:
           echo "Waiting for PostgreSQL to be ready..."
           sleep 10
           
-          # Parse the endpoint to get hostname and port separately
-          ENDPOINT="${rds_endpoint}"
-          HOSTNAME=$(echo $ENDPOINT | cut -d':' -f1)
-          PORT=$(echo $ENDPOINT | cut -d':' -f2)
+          # Parse the connection string to get components
+          DB_HOST=$(echo $DB_URL | sed -n 's/.*@\([^:]*\).*/\1/p')
+          DB_PORT=$(echo $DB_URL | sed -n 's/.*:\([0-9]*\)\/.*/\1/p')
+          DB_NAME=$(echo $DB_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
+          DB_USER=$(echo $DB_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
+          DB_PASS=$(echo $DB_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\).*/\1/p')
           
           echo "=== [$(date)] CONNECTING TO POSTGRESQL ==="
-          echo "Host: $HOSTNAME"
-          echo "Port: $PORT"
-          echo "Database: vectordb"
+          echo "Host: $DB_HOST"
+          echo "Port: $DB_PORT"
+          echo "Database: $DB_NAME"
           
           # Test connection first
-          if ! PGPASSWORD="YourStrongPasswordHere" psql -h $HOSTNAME -p $PORT -U postgres -d vectordb -c "SELECT 1" > /dev/null 2>&1; then
+          if ! PGPASSWORD="$DB_PASS" psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "SELECT 1" > /dev/null 2>&1; then
             echo "=== [$(date)] ERROR: FAILED TO CONNECT TO POSTGRESQL ==="
             echo "Please check that the RDS instance is running and accessible from the EKS cluster."
             exit 1
@@ -41,7 +49,7 @@ spec:
           echo "Creating pgvector extension..."
           
           # Create the extension
-          if PGPASSWORD="YourStrongPasswordHere" psql -h $HOSTNAME -p $PORT -U postgres -d vectordb -c "CREATE EXTENSION IF NOT EXISTS vector;"; then
+          if PGPASSWORD="$DB_PASS" psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;"; then
             echo "=== [$(date)] PGVECTOR EXTENSION CREATED SUCCESSFULLY ==="
           else
             echo "=== [$(date)] ERROR: FAILED TO CREATE PGVECTOR EXTENSION ==="
@@ -50,7 +58,7 @@ spec:
           
           # Verify the extension
           echo "=== [$(date)] VERIFYING PGVECTOR EXTENSION ==="
-          if PGPASSWORD="YourStrongPasswordHere" psql -h $HOSTNAME -p $PORT -U postgres -d vectordb -c "SELECT extname, extversion FROM pg_extension WHERE extname = 'vector';"; then
+          if PGPASSWORD="$DB_PASS" psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c "SELECT extname, extversion FROM pg_extension WHERE extname = 'vector';"; then
             echo "=== [$(date)] VERIFICATION SUCCESSFUL ==="
             echo "=== [$(date)] PGVECTOR SETUP COMPLETED SUCCESSFULLY ==="
           else

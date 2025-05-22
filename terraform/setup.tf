@@ -47,14 +47,19 @@ resource "local_file" "setup_openwebui_values" {
 
 resource "local_file" "setup_openwebui_secret" {
   content = templatefile("${path.module}/../setup-openwebui/templates/secret.yaml.tpl", {
-    rds_endpoint   = aws_db_instance.postgres.endpoint
+    secret_name    = aws_secretsmanager_secret.db_connection_string.name
   })
   filename = "${path.module}/../setup-openwebui/secret.yaml"
 }
 
 resource "local_file" "setup_pgvector_job" {
-  content = templatefile("${path.module}/../setup-openwebui/templates/pgvector-job.yaml.tpl", {
-    rds_endpoint   = aws_db_instance.postgres.endpoint
-  })
+  content = templatefile("${path.module}/../setup-openwebui/templates/pgvector-job.yaml.tpl", {})
   filename = "${path.module}/../setup-openwebui/pgvector-job.yaml"
+}
+
+resource "local_file" "setup_cluster_secret_store" {
+  content = templatefile("${path.module}/../setup-openwebui/templates/cluster-secret-store.yaml.tpl", {
+    region = var.region
+  })
+  filename = "${path.module}/../setup-openwebui/cluster-secret-store.yaml"
 }

@@ -1,6 +1,7 @@
 # S3 bucket for Open WebUI document storage
 resource "aws_s3_bucket" "openwebui_docs" {
-  bucket = "${var.name}-openwebui-docs"
+  bucket_prefix = "${var.name}-openwebui-docs-"  # Changed from fixed name to prefix for global uniqueness
+  force_destroy = true  # Added to ensure clean destruction
   
   tags = {
     Name = "${var.name}-openwebui-docs"

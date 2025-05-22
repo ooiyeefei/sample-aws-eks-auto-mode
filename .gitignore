@@ -41,3 +41,4 @@ nodepools/
 **/values.yaml
 **/secret.yaml
 **/pgvector-job.yaml
+**/cluster-secret-store.yaml
