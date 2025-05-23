@@ -1,0 +1,43 @@
+---
+apiVersion: eks.amazonaws.com/v1
+kind: IngressClassParams
+metadata:
+  namespace: litellm
+  name: litellm-params
+spec:
+  scheme: internet-facing
+  targetType: ip
+
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  namespace: litellm
+  labels:
+    app.kubernetes.io/name: LoadBalancerController
+  name: litellm-alb
+spec:
+  controller: eks.amazonaws.com/alb
+  parameters:
+    apiGroup: eks.amazonaws.com
+    kind: IngressClassParams
+    name: litellm-params
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: litellm-ingress
+  namespace: litellm
+spec:
+  ingressClassName: litellm-alb
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: litellm-service
+            port:
+              number: 8000

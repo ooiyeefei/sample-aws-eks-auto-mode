@@ -5,6 +5,7 @@
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
 - [Setup Open Webui](#setup-open-webui)
+- [Setup LiteLLM](#setup-litellm)
 - [Cleanup](#cleanup)
 - [Contributing](#contributing)
 - [License and Disclaimer](#license-and-disclaimer)
@@ -61,6 +62,27 @@ terraform apply -auto-approve
 $(terraform output -raw configure_kubectl)
 ```
 
+## Setup Flow
+
+This project follows a sequential setup process:
+
+1. **✅ Infrastructure Setup** (completed above)
+   - EKS Auto Mode cluster
+   - VPC, RDS, S3, ElastiCache
+   - External Secrets Operator
+
+2. **📋 Next: OpenWebUI Setup**
+   - Deploy OpenWebUI with S3 and PostgreSQL integration
+   - Set up vector database with pgvector
+   - Configure vLLM service (optional)
+
+3. **🔄 Finally: LiteLLM Setup**
+   - Deploy LiteLLM as a multi-provider gateway
+   - Configure Redis caching and PostgreSQL tracking
+   - Set up external access via ALB
+
+**👉 Continue to: [Setup OpenWebUI](./setup-openwebui/)**
+
 ## Setup Open Webui
 
 This project includes an OpenWebUI deployment that uses:
@@ -72,6 +94,40 @@ This project includes an OpenWebUI deployment that uses:
 The setup process includes automated creation of the pgvector extension through a Kubernetes Job, eliminating the need for manual database configuration. Database credentials are securely managed using AWS Secrets Manager and the External Secrets Operator, following security best practices.
 
 For detailed setup instructions, proceed to [setup-openwebui](./setup-openwebui/)
+
+## Setup LiteLLM
+
+This project includes a LiteLLM deployment that provides:
+- Multi-provider LLM gateway with unified API
+- ElastiCache Redis for caching and session management
+- RDS PostgreSQL for configuration and usage tracking
+- AWS Secrets Manager for secure credential management
+- Cost tracking and rate limiting capabilities
+- Integration with existing vLLM service
+
+LiteLLM acts as a proxy that can route requests to multiple LLM providers (including your local vLLM service and external APIs like OpenAI, Anthropic, etc.) through a single, consistent interface. This enables:
+
+🔄 **Multi-Provider Routing**
+- Route between local vLLM and external LLM APIs
+- Fallback logic for high availability
+- Load balancing across multiple models
+
+📊 **Usage Tracking & Cost Management**
+- Track usage across different models and users
+- Set budgets and rate limits
+- Monitor costs in real-time
+
+⚡ **Performance Optimization**
+- Redis caching for improved response times
+- Request/response caching
+- Connection pooling
+
+🔐 **Security & Management**
+- Centralized API key management
+- User authentication and authorization
+- Admin UI for configuration
+
+For detailed setup instructions, proceed to [setup-litellm](./setup-litellm/)
 
 ## Cleanup
 

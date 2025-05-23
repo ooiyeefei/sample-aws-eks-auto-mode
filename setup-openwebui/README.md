@@ -1,13 +1,14 @@
-
-
 # Open WebUI Setup
+
+> **📋 Step 2 of 3**: This should be completed after the main Terraform infrastructure deployment.
 
 ## Prerequisites
 
 Before deploying Open WebUI, ensure you have:
-1. An EKS Auto Mode cluster running
-2. The AWS CLI configured with appropriate credentials
-3. kubectl configured to access your cluster
+1. ✅ **Completed**: Main Terraform infrastructure deployment ([see main README](../README.md))
+2. An EKS Auto Mode cluster running
+3. The AWS CLI configured with appropriate credentials
+4. kubectl configured to access your cluster
 
 ## Deployment Steps
 
@@ -237,3 +238,15 @@ psql -h $(echo $RDS_ENDPOINT | cut -d':' -f1) -p $(echo $RDS_ENDPOINT | cut -d':
 
 
 If both verifications are successful, your OpenWebUI deployment is correctly using S3 for document storage and PostgreSQL for vector embeddings.
+
+## Next Steps
+
+🔄 **Continue to Step 3**: Once OpenWebUI is successfully deployed and verified, proceed to set up LiteLLM as a multi-provider gateway.
+
+**👉 Next: [Setup LiteLLM](../setup-litellm/)**
+
+LiteLLM will provide:
+- Multi-provider LLM routing (local vLLM + external APIs)
+- Cost tracking and usage monitoring
+- Centralized API key management
+- Redis caching for improved performance

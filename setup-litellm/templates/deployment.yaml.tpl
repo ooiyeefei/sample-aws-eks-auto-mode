@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm-deployment
+  namespace: litellm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: litellm
+  template:
+    metadata:
+      labels:
+        app: litellm
+    spec:
+      serviceAccountName: litellm-sa
+      containers:
+      - name: litellm
+        image: ghcr.io/berriai/litellm:main-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PORT
+          value: "8000"
+        - name: LITELLM_CONFIG_PATH
+          value: "/app/config.yaml"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: litellm-db-credentials
+              key: url
+        - name: LITELLM_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: litellm-master-salt
+              key: LITELLM_MASTER_KEY
+        - name: LITELLM_SALT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: litellm-master-salt
+              key: LITELLM_SALT_KEY
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+      volumes:
+      - name: config-volume
+        configMap:
+          name: litellm-config
