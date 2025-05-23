@@ -19,10 +19,10 @@ spec:
         image: ghcr.io/berriai/litellm:main-latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 8000
+        - containerPort: 4000
         env:
         - name: PORT
-          value: "8000"
+          value: "4000"
         - name: LITELLM_CONFIG_PATH
           value: "/app/config.yaml"
         - name: DATABASE_URL
@@ -53,14 +53,14 @@ spec:
             memory: "1Gi"
         readinessProbe:
           httpGet:
-            path: /health
-            port: 8000
+            path: /health/readiness
+            port: 4000
           initialDelaySeconds: 10
           periodSeconds: 5
         livenessProbe:
           httpGet:
-            path: /health
-            port: 8000
+            path: /health/liveliness
+            port: 4000
           initialDelaySeconds: 15
           periodSeconds: 10
       volumes:

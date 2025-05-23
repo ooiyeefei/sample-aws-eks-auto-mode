@@ -17,7 +17,10 @@ module "external_secrets_pod_identity" {
       ]
       resources = [
         aws_secretsmanager_secret.postgres_credentials.arn,
-        aws_secretsmanager_secret.db_connection_string.arn
+        aws_secretsmanager_secret.db_connection_string.arn,
+        aws_secretsmanager_secret.litellm_master_salt.arn,
+        aws_secretsmanager_secret.litellm_api_keys.arn,
+        aws_secretsmanager_secret.litellm_db_connection_string.arn
       ]
     }
   ]

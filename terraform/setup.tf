@@ -104,10 +104,3 @@ resource "local_file" "setup_litellm_secret" {
   })
   filename = "${path.module}/../setup-litellm/secret.yaml"
 }
-
-resource "local_file" "setup_litellm_serviceaccount" {
-  content = templatefile("${path.module}/../setup-litellm/templates/serviceaccount.yaml.tpl", {
-    litellm_pod_identity_role_arn = module.litellm_pod_identity.iam_role_arn
-  })
-  filename = "${path.module}/../setup-litellm/serviceaccount.yaml"
-}

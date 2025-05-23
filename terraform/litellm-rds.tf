@@ -2,7 +2,7 @@
 resource "random_password" "litellm_db_password" {
   length           = 16
   special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  override_special = "!#$%*-_=+"
 }
 
 # AWS Secrets Manager secret for LiteLLM PostgreSQL credentials
