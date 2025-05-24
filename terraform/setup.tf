@@ -65,35 +65,14 @@ resource "local_file" "setup_cluster_secret_store" {
 }
 
 # LiteLLM template generation
-resource "local_file" "setup_litellm_config" {
-  content = templatefile("${path.module}/../setup-litellm/templates/config.yaml.tpl", {
-    vllm_service_url = "http://vllm-service.vllm-inference.svc.cluster.local"
-    redis_host = aws_elasticache_replication_group.litellm_redis.primary_endpoint_address
-    redis_port = aws_elasticache_replication_group.litellm_redis.port
-    redis_password = random_password.litellm_redis_password.result
-    litellm_master_key = local.litellm_master_key
-    database_url = "postgresql://llmproxy:${random_password.litellm_db_password.result}@${aws_db_instance.litellm_postgres.address}:${aws_db_instance.litellm_postgres.port}/litellm"
-    litellm_salt_key = local.litellm_salt_key
-  })
-  filename = "${path.module}/../setup-litellm/config.yaml"
-}
-
 resource "local_file" "setup_litellm_configmap" {
   content = templatefile("${path.module}/../setup-litellm/templates/configmap.yaml.tpl", {
-    vllm_service_url = "http://vllm-service.vllm-inference.svc.cluster.local"
+    vllm_service_url = "http://vllm-service.vllm-inference.svc.cluster.local:80/v1"
     redis_host = aws_elasticache_replication_group.litellm_redis.primary_endpoint_address
     redis_port = aws_elasticache_replication_group.litellm_redis.port
     redis_password = random_password.litellm_redis_password.result
-    litellm_master_key = local.litellm_master_key
-    database_url = "postgresql://llmproxy:${random_password.litellm_db_password.result}@${aws_db_instance.litellm_postgres.address}:${aws_db_instance.litellm_postgres.port}/litellm"
-    litellm_salt_key = local.litellm_salt_key
   })
   filename = "${path.module}/../setup-litellm/configmap.yaml"
-}
-
-resource "local_file" "setup_litellm_deployment" {
-  content = templatefile("${path.module}/../setup-litellm/templates/deployment.yaml.tpl", {})
-  filename = "${path.module}/../setup-litellm/deployment.yaml"
 }
 
 resource "local_file" "setup_litellm_secret" {

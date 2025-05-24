@@ -44,5 +44,4 @@ nodepools/
 /setup-openwebui/cluster-secret-store.yaml
 /setup-litellm/config.yaml
 /setup-litellm/configmap.yaml
-/setup-litellm/deployment.yaml
 /setup-litellm/secret.yaml

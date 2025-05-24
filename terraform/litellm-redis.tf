@@ -73,6 +73,6 @@ resource "aws_security_group_rule" "eks_to_redis" {
   to_port                  = 6379
   protocol                 = "tcp"
   security_group_id        = aws_security_group.litellm_redis_sg.id
-  source_security_group_id = module.eks.node_security_group_id
+  source_security_group_id = module.eks.cluster_primary_security_group_id
   description              = "Allow EKS nodes to connect to Redis"
 }

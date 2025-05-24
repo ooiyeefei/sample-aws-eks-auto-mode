@@ -6,11 +6,12 @@ metadata:
 data:
   config.yaml: |
     model_list:
-      - model_name: vllm-model
+      - model_name: deepseek
         litellm_params:
-          model: vllm/model
+          model: openai/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
           api_base: "${vllm_service_url}"
-          timeout: 300
+          api_key: "dummy"
+          num_retries: 3
 
     litellm_settings:
       success_callback: ["redis"]
@@ -26,14 +27,10 @@ data:
         ssl_ca_certs: null
 
     general_settings:
-      master_key: "${litellm_master_key}"
-      database_url: "${database_url}"
+      # master_key and database_url will be set via environment variables
       disable_spend_logs: false
       disable_usage_tracking: false
       disable_telemetry: true
       routing_strategy: "simple-shuffle"
       num_retries: 3
       allowed_origins: ["*"]
-
-    environment_variables:
-      LITELLM_SALT_KEY: "${litellm_salt_key}"

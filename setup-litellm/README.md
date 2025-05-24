@@ -86,7 +86,6 @@ Get the ALB URL for accessing LiteLLM:
 
 ```bash
 # Wait for ALB to be provisioned (may take a few minutes)
-kubectl get ingress litellm-ingress -n litellm -w
 
 # Get the load balancer URL
 export LB_URL=$(kubectl get ingress litellm-ingress -n litellm -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
@@ -95,46 +94,13 @@ export LB_URL=$(kubectl get ingress litellm-ingress -n litellm -o jsonpath='{.st
 echo "LiteLLM is available at: http://$LB_URL"
 ```
 
-## Configuration
+Click on the *LiteLLM Admin Panel on /ui* hyperlink. 
 
-### Model Configuration
-
-LiteLLM is pre-configured to route to your existing vLLM service. The configuration includes:
-
-- **vllm-model**: Routes to the vLLM service deployed in the `vllm-inference` namespace
-- **Redis caching**: Enabled for improved performance with SSL encryption
-- **Database persistence**: Stores configuration and usage data in PostgreSQL
-
-### Adding External Providers
-
-To add external LLM providers (OpenAI, Anthropic, etc.), update the API keys in AWS Secrets Manager:
-
+Login Details:
 ```bash
-# Get the secret name from Terraform output
-cd ../terraform
-SECRET_NAME=$(terraform output -raw litellm_api_keys_secret_arn | cut -d':' -f7)
-
-# Update the secret with your API keys
-aws secretsmanager update-secret \
-  --secret-id $SECRET_NAME \
-  --secret-string '{
-    "OPENAI_API_KEY": "your-openai-key",
-    "ANTHROPIC_API_KEY": "your-anthropic-key"
-  }'
-
-cd ../setup-litellm
+echo "Username: admin"
+echo "Password: $(kubectl get secret litellm-master-salt -n litellm -o jsonpath='{.data.LITELLM_MASTER_KEY}' | base64 -d)"
 ```
-
-The External Secrets Operator will automatically sync these to Kubernetes secrets within 15 minutes.
-
-### Updating Configuration
-
-To modify the LiteLLM configuration:
-
-1. Edit the `templates/configmap.yaml.tpl` file
-2. Run `terraform apply` from the terraform directory to regenerate the ConfigMap
-3. Apply the updated ConfigMap: `kubectl apply -f configmap.yaml`
-4. Restart the deployment: `kubectl rollout restart deployment/litellm-deployment -n litellm`
 
 ## Usage
 
@@ -146,68 +112,42 @@ Once deployed, you can use LiteLLM's OpenAI-compatible API:
 # Get the master key from secrets
 MASTER_KEY=$(kubectl get secret litellm-master-salt -n litellm -o jsonpath='{.data.LITELLM_MASTER_KEY}' | base64 -d)
 
-# Make a request to the vLLM model through LiteLLM
+# Make a request to the deepseek model through LiteLLM
 curl -X POST "http://$LB_URL/v1/chat/completions" \
   -H "Authorization: Bearer $MASTER_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "vllm-model",
+    "model": "deepseek",
     "messages": [{"role": "user", "content": "Hello, how are you?"}]
   }'
 ```
 
-### Admin UI
-
-LiteLLM provides an admin UI for managing users, API keys, and monitoring usage:
-
-```bash
-# Access the admin UI
-echo "Admin UI available at: http://$LB_URL"
-```
-
-Default credentials:
-- Username: `admin`
-- Password: Use the master key from the secret
-
 ### Integration with OpenWebUI
 
-To use LiteLLM as a proxy for OpenWebUI, update the OpenWebUI configuration to point to the LiteLLM service:
-
-```yaml
-# In OpenWebUI values.yaml
-openaiBaseApiUrls: ["http://litellm-service.litellm.svc.cluster.local:8000/v1"]
-```
-
-Then redeploy OpenWebUI:
-```bash
-cd ../setup-openwebui
-helm upgrade --install open-webui open-webui/open-webui -f values.yaml -n vllm-inference
-```
-
-## EKS Auto Mode Ingress
-
-This deployment uses the correct EKS Auto Mode ingress format with:
-
-- **IngressClassParams**: Defines ALB scheme and target type
-- **IngressClass**: References the controller and parameters
-- **Ingress**: Uses `ingressClassName` instead of annotations
-
-The ingress configuration creates:
-- Internet-facing Application Load Balancer
-- IP target type for ClusterIP service
-- HTTP access on port 80
-
-## Monitoring and Troubleshooting
-
-### Check Logs
+To use LiteLLM as a proxy for OpenWebUI:
 
 ```bash
-# View LiteLLM logs
-kubectl logs -f deployment/litellm-deployment -n litellm
+# Get the LiteLLM master key
+MASTER_KEY=$(kubectl get secret litellm-master-salt -n litellm -o jsonpath='{.data.LITELLM_MASTER_KEY}' | base64 -d)
 
-# View External Secrets Operator logs
-kubectl logs -f deployment/external-secrets -n external-secrets
+# Go to admin settings:
+
+# Get the OpenWebUI URL
+OPENWEBUI_URL=$(kubectl get service open-webui-service -n vllm-inference -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+echo "OpenWebUI settings is available at: http://$OPENWEBUI_URL/admin/settings"
 ```
+
+Go to connections --> Create a new OpenAI API Connection
+
+Use the following values:
+```bash
+echo "URL: http://litellm-service.litellm.svc.cluster.local:4000/v1"
+echo "API Key: $MASTER_KEY"
+```
+
+Now go create a new chat and you should have new model.
+- deepseek is the deepseek model via litellm
+- deepseek-ai/DeepSeek-R1-Distill-Qwen-32B is the mdoel directly served by vLLM
 
 ## Security Considerations
 

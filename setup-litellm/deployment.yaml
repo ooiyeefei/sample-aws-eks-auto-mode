@@ -18,6 +18,7 @@ spec:
       - name: litellm
         image: ghcr.io/berriai/litellm:main-latest
         imagePullPolicy: Always
+        args: [ "--config", "/app/config.yaml" ]
         ports:
         - containerPort: 4000
         env:
@@ -40,6 +41,8 @@ spec:
             secretKeyRef:
               name: litellm-master-salt
               key: LITELLM_SALT_KEY
+        - name: STORE_MODEL_IN_DB
+          value: "true"
         volumeMounts:
         - name: config-volume
           mountPath: /app/config.yaml

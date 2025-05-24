@@ -2,7 +2,7 @@
 resource "random_password" "postgres" {
   length           = 16
   special          = true
-  override_special = "!#$%*-_=+"
+  override_special = "!*-_"
 }
 
 # Create AWS Secrets Manager secret for PostgreSQL credentials

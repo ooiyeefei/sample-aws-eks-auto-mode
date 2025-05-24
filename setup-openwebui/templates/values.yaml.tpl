@@ -26,7 +26,7 @@ extraEnvVars:
     value: "pgvector"
   
 
-openaiBaseApiUrls: ["http://vllm-service/v1", "http://open-webui-pipelines.vllm-inference.svc.cluster.local:9099"]
+openaiBaseApiUrls: ["http://vllm-service/v1"]
 
 # Disable the embedded Ollama chart
 ollama:
