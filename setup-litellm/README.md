@@ -135,7 +135,7 @@ OPENWEBUI_URL=$(kubectl get service open-webui-service -n vllm-inference -o json
 echo "OpenWebUI settings is available at: http://$OPENWEBUI_URL/admin/settings"
 ```
 
-Go to admin settings --> Go to connections --> Create a new OpenAI API Connection
+Go to settings --> admin settings --> Go to connections --> Create a new OpenAI API Connection
 
 Use the following values:
 ```bash
