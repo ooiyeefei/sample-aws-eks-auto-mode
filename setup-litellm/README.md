@@ -31,7 +31,24 @@ Before deploying LiteLLM, ensure you have:
 cd setup-litellm
 ```
 
-### 2. Deploy Kubernetes Resources
+### 2. (Optional) Add External Provider API Keys
+
+If you want to use external providers (Azure OpenAI, OpenAI, Anthropic, etc.):
+
+```bash
+# Update API keys in AWS Secrets Manager
+chmod +x update-secrets.sh
+./update-secrets.sh
+```
+
+This script will:
+- Read API keys from your `.env` file (created in the main directory)
+- Update the AWS Secrets Manager secret with your keys
+- The External Secrets Operator will automatically sync these to Kubernetes
+
+> **Note**: You can run this script anytime to update API keys without redeploying.
+
+### 3. Deploy Kubernetes Resources
 
 Deploy the resources in the following order:
 

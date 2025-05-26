@@ -49,7 +49,22 @@ git clone -b cgk https://github.com/aws-samples/sample-aws-eks-auto-mode.git
 cd sample-aws-eks-auto-mode
 ```
 
-2. **Deploy Cluster**:
+2. **Configure LiteLLM (Optional)**:
+If you plan to use LiteLLM with external providers (Azure OpenAI, OpenAI, etc.):
+```bash
+# Copy the environment template
+cp .env.tpl .env
+```
+
+- **Edit .env** to add your API keys (e.g., `AZURE_GPT_4O_API_KEY=your-key-here`)
+- **Edit litellm-models.yaml** to configure your models:
+  - Uncomment the models you want to use
+  - Update the `api_base` URLs to match your Azure resources
+  - The `api_key` references (e.g., `os.environ/AZURE_GPT_4O_API_KEY`) will automatically use values from your .env file
+
+> **Note**: You can add models later by updating these files and running the update script in setup-litellm/
+
+3. **Deploy Cluster**:
 ```bash
 # Navigate to Terraform directory
 cd terraform

@@ -44,14 +44,13 @@ resource "aws_secretsmanager_secret" "litellm_api_keys" {
   }
 }
 
-# Store empty values initially - these can be updated manually later
+# Store empty JSON object initially - will be populated by update-secrets.sh script
 resource "aws_secretsmanager_secret_version" "litellm_api_keys_ver" {
   secret_id = aws_secretsmanager_secret.litellm_api_keys.id
 
   secret_string = jsonencode({
-    OPENAI_API_KEY = ""
-    ANTHROPIC_API_KEY = ""
-    # Add other provider keys as needed
+    # This will be populated dynamically by the update-secrets.sh script
+    # which reads all key-value pairs from the .env file
   })
 }
 

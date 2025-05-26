@@ -1,6 +1,11 @@
 # Pem Files
 *.pem
 
+# Environment files with sensitive data
+.env
+.env.local
+.env.*.local
+
 # Local .terraform directories
 **/.terraform/*
 

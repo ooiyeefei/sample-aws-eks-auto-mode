@@ -65,9 +65,16 @@ resource "local_file" "setup_cluster_secret_store" {
 }
 
 # LiteLLM template generation
+locals {
+  # Read the litellm-models.yaml file and indent it properly for YAML
+  litellm_models_content = fileexists("${path.module}/../litellm-models.yaml") ? file("${path.module}/../litellm-models.yaml") : "# No models configured"
+  # Add proper indentation (6 spaces) for each line
+  litellm_models_indented = join("\n", [for line in split("\n", local.litellm_models_content) : line != "" ? "      ${line}" : ""])
+}
+
 resource "local_file" "setup_litellm_configmap" {
   content = templatefile("${path.module}/../setup-litellm/templates/configmap.yaml.tpl", {
-    vllm_service_url = "http://vllm-service.vllm-inference.svc.cluster.local:80/v1"
+    model_list = local.litellm_models_indented
     redis_host = aws_elasticache_replication_group.litellm_redis.primary_endpoint_address
     redis_port = aws_elasticache_replication_group.litellm_redis.port
     redis_password = random_password.litellm_redis_password.result

@@ -43,6 +43,10 @@ spec:
               key: LITELLM_SALT_KEY
         - name: STORE_MODEL_IN_DB
           value: "true"
+        envFrom:
+        - secretRef:
+            name: litellm-api-keys
+            optional: true
         volumeMounts:
         - name: config-volume
           mountPath: /app/config.yaml

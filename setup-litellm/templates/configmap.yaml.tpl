@@ -6,12 +6,7 @@ metadata:
 data:
   config.yaml: |
     model_list:
-      - model_name: deepseek
-        litellm_params:
-          model: openai/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B
-          api_base: "${vllm_service_url}"
-          api_key: "dummy"
-          num_retries: 3
+${model_list}
 
     litellm_settings:
       success_callback: ["redis"]
