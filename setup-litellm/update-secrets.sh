@@ -31,7 +31,8 @@ if [ -z "$SECRET_ARN" ]; then
     echo "Make sure you have run 'terraform apply' first"
     exit 1
 fi
-SECRET_NAME=$(echo $SECRET_ARN | awk -F: '{print $NF}')
+# Extract just the secret name without the version suffix
+SECRET_NAME=$(echo $SECRET_ARN | awk -F: '{print $7}' | awk -F- '{for(i=1;i<=NF-1;i++) printf "%s%s", $i, (i<NF-1?"-":"")}')
 cd - > /dev/null
 
 echo -e "Secret name: ${YELLOW}$SECRET_NAME${NC}"
