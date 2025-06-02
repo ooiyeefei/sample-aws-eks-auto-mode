@@ -2,6 +2,31 @@
 
 > **📋 Step 2 of 3**: This should be completed after the main Terraform infrastructure deployment.
 
+## Custom GAR GPT Branding
+
+This deployment uses a **custom OpenWebUI image** with GAR GPT branding that replaces all OpenWebUI references and logos. The custom image is pre-built and available in ECR.
+
+### Custom Image Features:
+- **Branding**: All "Open WebUI" text replaced with "GAR GPT"
+- **Logo**: Custom GAR logo used as favicon and brand image
+- **UI Cleanup**: Hidden OpenWebUI documentation and community links
+- **Dynamic Updates**: JavaScript automatically replaces branding in dynamically loaded content
+
+### Building Your Own Custom Image (Optional)
+
+If you need to modify the branding or update the image:
+
+1. **Navigate to custom image directory**:
+   ```bash
+   cd custom-image/
+   ```
+
+2. **Follow the build instructions** in `custom-image/README.md`
+
+3. **Update the image tag** in `templates/values.yaml.tpl` to use your new version
+
+The current deployment uses: `public.ecr.aws/v2f5y6u4/openwebui/custom-build:v0.0.1`
+
 ## Prerequisites
 
 Before deploying Open WebUI, ensure you have:
@@ -9,6 +34,7 @@ Before deploying Open WebUI, ensure you have:
 2. An EKS Auto Mode cluster running
 3. The AWS CLI configured with appropriate credentials
 4. kubectl configured to access your cluster
+5. **Custom GAR GPT image** available in ECR (pre-built and ready to use)
 
 ## Deployment Steps
 

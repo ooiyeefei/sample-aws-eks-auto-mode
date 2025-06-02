@@ -1,4 +1,10 @@
-# Open WebUI Helm Chart Values
+# Open WebUI Helm Chart Values - GAR GPT Custom Image
+
+# Use custom GAR GPT branded image
+image:
+  repository: public.ecr.aws/v2f5y6u4/openwebui/custom-build
+  tag: v0.0.1
+  pullPolicy: IfNotPresent
 
 # Configure persistence to use S3
 persistence:
