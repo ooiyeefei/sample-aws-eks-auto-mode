@@ -1,0 +1,37 @@
+# OpenWebUI Asset ConfigMaps
+# These ConfigMaps contain the custom branding assets that will be mounted into the OpenWebUI container
+# To update assets: kubectl create configmap <name> --from-file=<asset> -n vllm-inference --dry-run=client -o yaml | kubectl apply -f -
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openwebui-favicon
+  namespace: vllm-inference
+data: {}
+# Binary data will be populated when you run:
+# kubectl create configmap openwebui-favicon --from-file=favicon.png=./assets/favicon.png -n vllm-inference --dry-run=client -o yaml | kubectl apply -f -
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openwebui-splash
+  namespace: vllm-inference
+data: {}
+# Binary data will be populated when you run:
+# kubectl create configmap openwebui-splash --from-file=splash.png=./assets/splash.png --from-file=splash-dark.png=./assets/splash-dark.png -n vllm-inference --dry-run=client -o yaml | kubectl apply -f -
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openwebui-oauth-config
+  namespace: vllm-inference
+data:
+  # Non-sensitive OAuth configuration - replace with your actual values
+  ENABLE_OAUTH_SIGNUP: "true"
+  OAUTH_PROVIDER_NAME: "Sinarmas (SSO)"
+  OAUTH_SCOPES: "openid email profile"
+  OAUTH_CLIENT_ID: "privategpt"
+  MICROSOFT_CLIENT_ID: "your-microsoft-client-id-here"
+  MICROSOFT_CLIENT_TENANT_ID: "your-microsoft-tenant-id-here"

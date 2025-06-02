@@ -61,8 +61,6 @@ docker rm temp-openwebui
 Navigate to this directory and build the image:
 
 ```bash
-cd sample-aws-eks-auto-mode/setup-openwebui/custom-image
-
 # Build the image with version tag
 docker build -t openwebui/custom-build:v0.0.1 .
 
@@ -136,70 +134,3 @@ When you need to update the branding or fix issues:
   - Hidden OpenWebUI documentation and community links
   - Added dynamic content monitoring
 
-## Troubleshooting
-
-### Build Issues
-
-**Problem**: Docker build fails with permission errors
-```bash
-# Solution: Ensure proper file permissions
-chmod 644 index.html
-chmod 644 static/gar-logo.png
-```
-
-**Problem**: Static files not copied
-```bash
-# Solution: Verify file structure
-ls -la static/
-# Should show gar-logo.png
-```
-
-### Runtime Issues
-
-**Problem**: Branding not applied
-- Check browser console for JavaScript errors
-- Verify static files are accessible at `/static/gar-logo.png`
-- Ensure the MutationObserver scripts are running
-
-**Problem**: Original OpenWebUI elements still visible
-- Check CSS selectors in the `<style>` section
-- Add additional CSS rules for new elements
-- Verify JavaScript replacement logic
-
-### ECR Issues
-
-**Problem**: Push fails with authentication error
-```bash
-# Solution: Re-authenticate
-aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/v2f5y6u4
-```
-
-**Problem**: Repository doesn't exist
-```bash
-# Solution: Create the repository in ECR console or via CLI
-aws ecr-public create-repository --repository-name openwebui/custom-build --region us-east-1
-```
-
-## Security Considerations
-
-- The custom image maintains the same security context as the base OpenWebUI image
-- No additional privileges or capabilities are added
-- Static files are served with the same permissions as the original application
-- All customizations are client-side (HTML/CSS/JavaScript)
-
-## Maintenance
-
-### Regular Updates
-
-1. **Monitor base image updates**: Check for new OpenWebUI releases
-2. **Update base image**: Modify Dockerfile to use newer base image versions
-3. **Test compatibility**: Ensure customizations work with new versions
-4. **Rebuild and redeploy**: Follow the version update process
-
-### Backup
-
-Keep backups of:
-- Original `index.html` files for reference
-- Custom static assets
-- Build scripts and documentation
-- Version history and change logs

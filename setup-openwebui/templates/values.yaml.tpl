@@ -31,8 +31,82 @@ extraEnvVars:
   - name: "VECTOR_DB"
     value: "pgvector"
   
+  # OAuth configuration from ConfigMap (non-sensitive)
+  - name: "ENABLE_OAUTH_SIGNUP"
+    valueFrom:
+      configMapKeyRef:
+        name: "openwebui-oauth-config"
+        key: "ENABLE_OAUTH_SIGNUP"
+  - name: "OAUTH_PROVIDER_NAME"
+    valueFrom:
+      configMapKeyRef:
+        name: "openwebui-oauth-config"
+        key: "OAUTH_PROVIDER_NAME"
+  - name: "OAUTH_SCOPES"
+    valueFrom:
+      configMapKeyRef:
+        name: "openwebui-oauth-config"
+        key: "OAUTH_SCOPES"
+  - name: "OAUTH_CLIENT_ID"
+    valueFrom:
+      configMapKeyRef:
+        name: "openwebui-oauth-config"
+        key: "OAUTH_CLIENT_ID"
+  - name: "MICROSOFT_CLIENT_ID"
+    valueFrom:
+      configMapKeyRef:
+        name: "openwebui-oauth-config"
+        key: "MICROSOFT_CLIENT_ID"
+  - name: "MICROSOFT_CLIENT_TENANT_ID"
+    valueFrom:
+      configMapKeyRef:
+        name: "openwebui-oauth-config"
+        key: "MICROSOFT_CLIENT_TENANT_ID"
+  
+  # OAuth configuration from Secrets Manager (sensitive)
+  - name: "MICROSOFT_CLIENT_SECRET"
+    valueFrom:
+      secretKeyRef:
+        name: "openwebui-oauth-credentials"
+        key: "MICROSOFT_CLIENT_SECRET"
+  - name: "OAUTH_CLIENT_SECRET"
+    valueFrom:
+      secretKeyRef:
+        name: "openwebui-oauth-credentials"
+        key: "OAUTH_CLIENT_SECRET"
+  - name: "OPENID_PROVIDER_URL"
+    valueFrom:
+      secretKeyRef:
+        name: "openwebui-oauth-credentials"
+        key: "OPENID_PROVIDER_URL"
+  
 
 openaiBaseApiUrls: ["http://vllm-service/v1"]
+
+# Custom asset volume mounts (mirrors VM volume mount approach)
+extraVolumes:
+  - name: favicon-assets
+    configMap:
+      name: openwebui-favicon
+  - name: splash-assets
+    configMap:
+      name: openwebui-splash
+
+extraVolumeMounts:
+  # Favicon mounts
+  - name: favicon-assets
+    mountPath: /app/build/static/favicon.png
+    subPath: favicon.png
+  - name: favicon-assets
+    mountPath: /app/build/favicon.png
+    subPath: favicon.png
+  # Splash image mounts
+  - name: splash-assets
+    mountPath: /app/build/static/splash.png
+    subPath: splash.png
+  - name: splash-assets
+    mountPath: /app/build/static/splash-dark.png
+    subPath: splash-dark.png
 
 # Disable the embedded Ollama chart
 ollama:

@@ -20,7 +20,8 @@ module "external_secrets_pod_identity" {
         aws_secretsmanager_secret.db_connection_string.arn,
         aws_secretsmanager_secret.litellm_master_salt.arn,
         aws_secretsmanager_secret.litellm_api_keys.arn,
-        aws_secretsmanager_secret.litellm_db_connection_string.arn
+        aws_secretsmanager_secret.litellm_db_connection_string.arn,
+        aws_secretsmanager_secret.oauth_credentials.arn
       ]
     }
   ]
@@ -92,3 +93,22 @@ resource "aws_secretsmanager_secret_version" "db_connection_string_version" {
 }
 
 # The access to the new secret is already included in the Pod Identity policy statements above
+
+# Create OAuth credentials secret for OpenWebUI
+resource "aws_secretsmanager_secret" "oauth_credentials" {
+  name_prefix = "${var.name}-oauth-"
+  recovery_window_in_days = 0  # Allow immediate deletion
+  
+  tags = {
+    Name = "${var.name}-oauth-credentials"
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "oauth_credentials_version" {
+  secret_id = aws_secretsmanager_secret.oauth_credentials.id
+  secret_string = jsonencode({
+    MICROSOFT_CLIENT_SECRET = "dummy-microsoft-client-secret"
+    OAUTH_CLIENT_SECRET = "dummy-oauth-client-secret"
+    OPENID_PROVIDER_URL = "https://dummy-openid-provider-url/openid-configuration"
+  })
+}

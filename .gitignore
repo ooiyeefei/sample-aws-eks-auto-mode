@@ -3,6 +3,7 @@
 
 # Environment files with sensitive data
 .env
+.env-oauth
 .env.local
 .env.*.local
 

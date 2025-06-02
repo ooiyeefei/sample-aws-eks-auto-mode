@@ -64,6 +64,13 @@ resource "local_file" "setup_cluster_secret_store" {
   filename = "${path.module}/../setup-openwebui/cluster-secret-store.yaml"
 }
 
+resource "local_file" "setup_openwebui_oauth_secret" {
+  content = templatefile("${path.module}/../setup-openwebui/templates/oauth-secret.yaml.tpl", {
+    oauth_secret_name = aws_secretsmanager_secret.oauth_credentials.name
+  })
+  filename = "${path.module}/../setup-openwebui/oauth-secret.yaml"
+}
+
 # LiteLLM template generation
 locals {
   # Read the litellm-models.yaml file and indent it properly for YAML

@@ -36,6 +36,57 @@ Before deploying Open WebUI, ensure you have:
 4. kubectl configured to access your cluster
 5. **Custom GAR GPT image** available in ECR (pre-built and ready to use)
 
+## OAuth Configuration (Optional)
+
+This deployment supports OAuth/SSO authentication with Microsoft Azure AD and other providers.
+
+### OAuth Setup
+
+1. **Configure OAuth environment file**:
+   ```bash
+   # Copy the OAuth template (from project root)
+   cp ../.env-oauth.tpl ../.env-oauth
+   ```
+   Edit the OAuth credentials file
+   
+   Add your sensitive OAuth credentials:
+   ```bash
+   MICROSOFT_CLIENT_SECRET=your-microsoft-client-secret-here
+   OAUTH_CLIENT_SECRET=your-oauth-client-secret-here
+   OPENID_PROVIDER_URL=https://your-openid-provider-url/openid-configuration
+   ```
+
+2. **Configure non-sensitive OAuth settings** in `asset-configmaps.yaml`:
+   
+   Update these values in the openwebui-oauth-config ConfigMap:
+   ```yaml
+   ENABLE_OAUTH_SIGNUP: "true"
+   OAUTH_PROVIDER_NAME: "Sinarmas (SSO)"
+   OAUTH_SCOPES: "openid email profile"
+   OAUTH_CLIENT_ID: "privategpt"
+   MICROSOFT_CLIENT_ID: "your-microsoft-client-id-here"
+   MICROSOFT_CLIENT_TENANT_ID: "your-microsoft-tenant-id-here"
+   ```
+
+3. **Update OAuth secrets in AWS Secrets Manager**:
+   ```bash
+   # Run the OAuth secrets update script
+   ./update-oauth-secrets.sh
+   ```
+   
+   This script will:
+   - Read your OAuth credentials from `../.env-oauth`
+   - Update the AWS Secrets Manager secret
+   - Sync with External Secrets Operator
+
+   > **Note**: The Terraform deployment creates the OAuth secret in AWS Secrets Manager automatically.
+
+## Asset Customization
+
+This deployment supports **configurable assets** that allow departments to customize logos and branding without rebuilding Docker images.
+
+> **See `assets/README.md`** for detailed asset customization instructions.
+
 ## Deployment Steps
 
 ### 1. Deploy Storage Class
