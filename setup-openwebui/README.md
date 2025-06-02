@@ -140,7 +140,29 @@ The logs will clearly indicate whether the operation succeeded or failed. If suc
 === [date] PGVECTOR SETUP COMPLETED SUCCESSFULLY ===
 ```
 
-### 4. Deploy Open WebUI with Helm
+### 4. Deploy Apache Tika for Document Processing
+
+Apache Tika provides advanced document processing capabilities, supporting over 1000 file formats including PDF, DOCX, XLSX, PPTX, and more.
+
+```bash
+# Add the Apache Tika Helm repository
+helm repo add tika https://apache.jfrog.io/artifactory/tika
+helm repo update
+
+# Deploy Apache Tika
+helm install tika tika/tika -f tika-values.yaml -n vllm-inference
+```
+
+Verify Tika deployment:
+```bash
+# Check if Tika pods are running
+kubectl get pods -n vllm-inference | grep tika
+
+# Check Tika service
+kubectl get svc -n vllm-inference | grep tika
+```
+
+### 5. Deploy Open WebUI with Helm
 
 ```bash
 helm repo add open-webui https://helm.openwebui.com/
@@ -148,7 +170,7 @@ helm repo update
 helm upgrade --install open-webui open-webui/open-webui -f values.yaml -n vllm-inference
 ```
 
-### 4. OPTIONAL - Deploy LLM
+### 6. OPTIONAL - Deploy LLM
 
 Need hugging face token for this.
 ```bash
@@ -250,6 +272,44 @@ spec:
 
 This approach follows security best practices by eliminating hardcoded credentials and centralizing credential management.
 
+### Apache Tika Document Processing
+
+OpenWebUI is configured to use Apache Tika for advanced document processing and text extraction. Tika supports over 1000 file formats and provides superior text extraction compared to basic parsers.
+
+**Automatic Configuration:**
+The Tika server URL is automatically configured via environment variable:
+```yaml
+extraEnvVars:
+  - name: "TIKA_SERVER_URL"
+    value: "http://tika.vllm-inference.svc.cluster.local:9998"
+```
+
+**Manual Configuration (Post-Deployment):**
+After deploying OpenWebUI, you need to configure it to use Tika through the admin panel:
+
+1. **Access OpenWebUI Admin Panel**:
+   - Login to your OpenWebUI instance
+   - Navigate to Admin Panel → Settings
+
+2. **Configure Document Processing**:
+   - Click on the **Documents** tab
+   - Change **Default content extraction engine** from "Default" to **"Tika"**
+   - Verify **Context extraction engine URL** is set to: `http://tika.vllm-inference.svc.cluster.local:9998`
+   - Save the changes
+
+3. **Test Tika Integration**:
+   - Upload a PDF, DOCX, or other document
+   - Verify that text extraction works properly
+   - Check that document content is available for chat queries
+
+**Supported File Formats:**
+- **Documents**: PDF, DOCX, DOC, RTF, TXT
+- **Spreadsheets**: XLSX, XLS, CSV
+- **Presentations**: PPTX, PPT
+- **Images**: PNG, JPG, TIFF (with OCR)
+- **Archives**: ZIP, TAR, 7Z
+- **And 1000+ more formats**
+
 ## Accessing Open WebUI
 
 After deployment, you can access Open WebUI through the Network Load Balancer:
@@ -314,7 +374,35 @@ psql -h $(echo $RDS_ENDPOINT | cut -d':' -f1) -p $(echo $RDS_ENDPOINT | cut -d':
 
 
 
-If both verifications are successful, your OpenWebUI deployment is correctly using S3 for document storage and PostgreSQL for vector embeddings.
+### Verify Apache Tika Integration
+
+1. **Check Tika Service Status**:
+   ```bash
+   # Verify Tika pods are running
+   kubectl get pods -n vllm-inference | grep tika
+   
+   # Check Tika service endpoint
+   kubectl get svc tika -n vllm-inference
+   ```
+
+2. **Test Tika Server Response**:
+   ```bash
+   # Port forward to test Tika locally
+   kubectl port-forward svc/tika 9998:9998 -n vllm-inference &
+   
+   # Test Tika server (should return "This is Tika Server. Please PUT")
+   curl -X GET http://localhost:9998/tika
+   
+   # Stop port forwarding
+   pkill -f "kubectl port-forward"
+   ```
+
+3. **Test Document Processing in OpenWebUI**:
+   - Upload a PDF or DOCX file in OpenWebUI
+   - Verify the document content is extracted and searchable
+   - Check that you can ask questions about the document content
+
+If all verifications are successful, your OpenWebUI deployment is correctly using S3 for document storage, PostgreSQL for vector embeddings, and Apache Tika for advanced document processing.
 
 ## Next Steps
 

@@ -80,6 +80,10 @@ extraEnvVars:
         name: "openwebui-oauth-credentials"
         key: "OPENID_PROVIDER_URL"
   
+  # Apache Tika configuration for document processing
+  - name: "TIKA_SERVER_URL"
+    value: "http://tika.vllm-inference.svc.cluster.local:9998"
+  
 
 openaiBaseApiUrls: ["http://vllm-service/v1"]
 

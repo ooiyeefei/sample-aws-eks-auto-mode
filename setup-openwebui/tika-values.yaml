@@ -1,0 +1,113 @@
+# Apache Tika Helm Chart Values
+# For integration with OpenWebUI document processing
+# Based on official Apache Tika Helm chart values
+
+replicaCount: 2
+
+image:
+  repository: apache/tika
+  pullPolicy: IfNotPresent
+  tag: "latest-full"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Environment variables (if needed)
+env: []
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 35002
+  runAsGroup: 35002
+
+service:
+  type: ClusterIP
+  port: 9998
+
+ingress:
+  enabled: false
+
+livenessProbe:
+  initialDelaySeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+  periodSeconds: 10
+  scheme: HTTP
+
+readinessProbe:
+  initialDelaySeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+  periodSeconds: 5
+  scheme: HTTP
+
+resources:
+  limits:
+    cpu: "1"
+    memory: 2000Mi
+  requests:
+    cpu: 500m
+    memory: 1500Mi
+
+autoscaling:
+  enabled: false
+
+networkPolicy:
+  enabled: false
+  allowExternal: true
+
+config:
+  base_url: "http://localhost/"
+
+# Custom Tika configuration for enhanced document processing
+tikaConfig: |
+  <?xml version="1.0" encoding="UTF-8"?>
+  <properties>
+    <parsers>
+      <!-- Default Parser for comprehensive document processing -->
+      <parser class="org.apache.tika.parser.DefaultParser">
+        <!-- Enable all supported formats for OpenWebUI integration -->
+      </parser>
+      
+      <!-- Enhanced PDF parser configuration -->
+      <parser class="org.apache.tika.parser.pdf.PDFParser">
+        <params>
+          <param name="extractInlineImages" type="bool">false</param>
+          <param name="extractUniqueInlineImagesOnly" type="bool">true</param>
+          <param name="sortByPosition" type="bool">true</param>
+        </params>
+      </parser>
+      
+      <!-- Office document parser for DOCX, XLSX, PPTX -->
+      <parser class="org.apache.tika.parser.microsoft.OfficeParser">
+        <params>
+          <param name="includeDeletedContent" type="bool">false</param>
+          <param name="includeMoveFromContent" type="bool">false</param>
+        </params>
+      </parser>
+    </parsers>
+    
+    <!-- Server security configuration -->
+    <server>
+      <params>
+        <param name="enableUnsecureFeatures" type="bool">false</param>
+        <param name="enableFileUrl" type="bool">false</param>
+        <param name="fileUrlReachable" type="bool">false</param>
+      </params>
+    </server>
+  </properties>
