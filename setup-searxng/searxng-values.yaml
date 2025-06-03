@@ -154,26 +154,6 @@ resources:
     cpu: "1000m"
     memory: "1Gi"
 
-# Replica configuration
-replicaCount: 2
-
-# Pod security context
-podSecurityContext:
-  runAsNonRoot: true
-  runAsUser: 1000
-  runAsGroup: 1000
-  fsGroup: 1000
-
-# Container security context
-securityContext:
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop:
-      - ALL
-  readOnlyRootFilesystem: false  # SearXNG needs write access for temp files
-  runAsNonRoot: true
-  runAsUser: 1000
-
 # Health check probes
 probes:
   readiness:

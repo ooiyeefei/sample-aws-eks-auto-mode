@@ -106,11 +106,11 @@ echo "OpenWebUI is available at: http://$OPENWEBUI_URL"
 ### 2. Enable Web Search in Chat
 
 1. **Open OpenWebUI** in your browser
-2. **Start a new chat** or open an existing conversation
-3. **Click the "+" button** next to the message input field
-4. **Toggle "Web Search" ON** - you should see it highlighted
-5. **Ask a question** that requires current information (e.g., "What's the latest news about AI?")
-6. **Verify results** - the AI response should include recent web search results
+2. **Go to Admin Settings**
+3. **Go to Web Search**
+4. **Enable Web Search**
+5. **Select searxng for Web Search Engine**
+6. **Click Save**
 
 ### 3. Test Different Queries
 
