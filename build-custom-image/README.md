@@ -101,3 +101,6 @@ COPY static/* /app/build/static/
 - ❌ No working directory changes (`WORKDIR`)
 - ❌ No environment variables (`ENV PGSSLMODE`, etc.)
 - ❌ No complex filesystem operations
+
+
+**Proceed over to [Setup OpenWebUI](./setup-openwebui/)**
