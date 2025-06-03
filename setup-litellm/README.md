@@ -1,6 +1,6 @@
 # LiteLLM Setup
 
-> **🔄 Step 3 of 3**: This should be completed after OpenWebUI setup is finished.
+> **🔄 Step 4 of 5**: This should be completed after OpenWebUI setup is finished.
 
 ## Overview
 

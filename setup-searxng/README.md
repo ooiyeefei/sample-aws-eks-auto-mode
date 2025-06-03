@@ -71,44 +71,6 @@ kubectl get svc -n vllm-inference | grep searxng
 # Check SearXNG logs
 kubectl logs deployment/searxng -n vllm-inference
 ```
-
-### 5. Update OpenWebUI Configuration
-
-Update your OpenWebUI deployment to enable web search:
-
-```bash
-# Navigate back to OpenWebUI setup
-cd ../setup-openwebui
-
-# Update OpenWebUI with SearXNG integration
-helm upgrade open-webui open-webui/open-webui -f values.yaml -n vllm-inference --reuse-values --set extraEnvVars[0].name="ENABLE_RAG_WEB_SEARCH" --set extraEnvVars[0].value="True" --set extraEnvVars[1].name="RAG_WEB_SEARCH_ENGINE" --set extraEnvVars[1].value="searxng" --set extraEnvVars[2].name="SEARXNG_QUERY_URL" --set extraEnvVars[2].value="http://searxng.vllm-inference.svc.cluster.local:8080/search?q=<query>&format=json"
-```
-
-Alternatively, you can update your `values.yaml` file to include the SearXNG environment variables:
-
-```yaml
-extraEnvVars:
-  # Existing variables...
-  
-  # SearXNG Web Search Configuration
-  - name: "ENABLE_RAG_WEB_SEARCH"
-    value: "True"
-  - name: "RAG_WEB_SEARCH_ENGINE"
-    value: "searxng"
-  - name: "RAG_WEB_SEARCH_RESULT_COUNT"
-    value: "5"
-  - name: "RAG_WEB_SEARCH_CONCURRENT_REQUESTS"
-    value: "10"
-  - name: "SEARXNG_QUERY_URL"
-    value: "http://searxng.vllm-inference.svc.cluster.local:8080/search?q=<query>&format=json"
-```
-
-Then redeploy:
-
-```bash
-helm upgrade open-webui open-webui/open-webui -f values.yaml -n vllm-inference
-```
-
 ## Configuration Details
 
 ### SearXNG Configuration

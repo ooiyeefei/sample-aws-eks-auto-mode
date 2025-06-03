@@ -1,6 +1,6 @@
 # Open WebUI Setup
 
-> **📋 Step 2 of 3**: This should be completed after the main Terraform infrastructure deployment.
+> **📋 Step 3 of 5**: This should be completed after the main Terraform infrastructure deployment.
 
 ## Prerequisites
 
