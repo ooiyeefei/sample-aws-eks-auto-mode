@@ -2,9 +2,9 @@
 
 This directory contains the files and scripts needed to build a custom OpenWebUI image with GAR GPT branding.
 
-## Version 0.0.7 - Minimal Approach
+## Version 0.1.0 - Minimal Approach
 
-Version 0.0.7 uses a **minimal approach** that maintains full database compatibility while adding GAR GPT branding. This approach was developed after discovering that complex permission fixes and environment variable modifications were causing database connection issues.
+Version 0.1.0 uses a **minimal approach** that maintains full database compatibility while adding GAR GPT branding. This approach was developed after discovering that complex permission fixes and environment variable modifications were causing database connection issues.
 
 ### Key Features
 
@@ -18,9 +18,9 @@ Version 0.0.7 uses a **minimal approach** that maintains full database compatibi
 
 ```
 custom-image/
-├── Dockerfile                    # Minimal Dockerfile (v0.0.7)
+├── Dockerfile                    # Minimal Dockerfile (v0.1.0)
 ├── extract-and-modify-index.sh   # Script to extract and modify index.html
-├── build-image.sh              # Build script for version 0.0.7
+├── build-image.sh              # Build script for version 0.1.0
 ├── README.md                     # This file
 ├── static/                       # Static assets directory
 │   ├── gar-logo.png             # GAR logo (required)
@@ -75,7 +75,7 @@ This script will:
 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/v2f5y6u4
 
 # Push the images
-docker push public.ecr.aws/v2f5y6u4/openwebui/custom-build:v0.0.7
+docker push public.ecr.aws/v2f5y6u4/openwebui/custom-build:v0.1.0
 docker push public.ecr.aws/v2f5y6u4/openwebui/custom-build:latest
 ```
 
@@ -83,7 +83,7 @@ docker push public.ecr.aws/v2f5y6u4/openwebui/custom-build:latest
 
 ### Minimal Dockerfile Approach
 
-The v0.0.7 Dockerfile is intentionally minimal:
+The v0.1.0 Dockerfile is intentionally minimal:
 
 ```dockerfile
 FROM ghcr.io/open-webui/open-webui:main
