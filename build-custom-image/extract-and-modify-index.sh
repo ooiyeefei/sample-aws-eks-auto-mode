@@ -155,9 +155,18 @@ div.mx-auto.max-w-2xl.font-primary > div.mx-5 > div.mb-1.flex > div:first-child 
 </style>
 EOF
 
-# Insert the branding scripts before </head>
-sed -i '/<\/head>/i\
-'"$(cat branding-scripts.html)" index.html
+# Insert the branding scripts before </head> using a more robust approach
+# Use awk to properly handle multi-line content insertion
+awk '/<\/head>/ { 
+    while ((getline line < "branding-scripts.html") > 0) {
+        print line
+    }
+    close("branding-scripts.html")
+}
+{ print }' index.html > index-temp.html
+
+# Replace the original with the modified version
+mv index-temp.html index.html
 
 # Clean up temporary file
 rm branding-scripts.html
@@ -168,7 +177,7 @@ echo "   1. Ensure you have the required static assets:"
 echo "      - static/gar-logo.png"
 echo "      - static/splash.png"
 echo "      - static/splash-dark.png"
-echo "   2. Run the build script: ./build-v0.0.4.sh"
+echo "   2. Run the build script: ./build-image.sh"
 echo ""
 echo "🔍 Files created:"
 echo "   - index-original.html (backup of original)"

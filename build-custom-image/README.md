@@ -20,7 +20,7 @@ Version 0.0.7 uses a **minimal approach** that maintains full database compatibi
 custom-image/
 ├── Dockerfile                    # Minimal Dockerfile (v0.0.7)
 ├── extract-and-modify-index.sh   # Script to extract and modify index.html
-├── build-v0.0.7.sh              # Build script for version 0.0.7
+├── build-image.sh              # Build script for version 0.0.7
 ├── README.md                     # This file
 ├── static/                       # Static assets directory
 │   ├── gar-logo.png             # GAR logo (required)
@@ -65,8 +65,7 @@ This script will:
 ### Step 3: Build the Custom Image
 
 ```bash
-# Build version 0.0.7
-./build-v0.0.7.sh
+./build-image.sh
 ```
 
 ### Step 4: Push to Registry

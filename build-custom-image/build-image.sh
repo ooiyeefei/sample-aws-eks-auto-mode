@@ -2,7 +2,7 @@
 set -e
 
 # Version 0.0.7 Configuration (minimal approach with proper index.html extraction)
-VERSION="v0.0.9"
+VERSION="v0.1.0"
 IMAGE_NAME="openwebui/custom-build"
 REGISTRY="public.ecr.aws/v2f5y6u4"
 FULL_IMAGE_NAME="$REGISTRY/$IMAGE_NAME:$VERSION"
@@ -71,10 +71,3 @@ echo "📝 Update values.yaml.tpl to use:"
 echo "   image:"
 echo "     repository: $REGISTRY/$IMAGE_NAME"
 echo "     tag: $VERSION"
-echo ""
-echo "🔄 Version 0.0.4 Changes:"
-echo "   - Minimal Dockerfile approach (no permission/user changes)"
-echo "   - Proper index.html extraction from current OpenWebUI image"
-echo "   - GAR GPT branding with favicon pointing to local static assets"
-echo "   - Database connection compatibility maintained"
-echo "   - Clean separation of branding from infrastructure"

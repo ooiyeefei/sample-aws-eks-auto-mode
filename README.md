@@ -77,6 +77,8 @@ terraform apply -auto-approve
 $(terraform output -raw configure_kubectl)
 ```
 
+**👉 Continue to: [Build Custom Image](./build-custom-image/)**
+
 ## Setup Flow
 
 This project follows a sequential setup process:
@@ -86,17 +88,26 @@ This project follows a sequential setup process:
    - VPC, RDS, S3, ElastiCache
    - External Secrets Operator
 
-2. **📋 Next: OpenWebUI Setup**
+2. **🎨 Build Custom Image**
+   - Create a customized OpenWebUI container image
+   - Remove default branding and logos for a clean, professional appearance
+   - Optimize image for your organization's requirements
+   - Essential step before deploying OpenWebUI services
+
+3. **📋 Next: OpenWebUI Setup**
    - Deploy OpenWebUI with S3 and PostgreSQL integration
    - Set up vector database with pgvector
+   - Set up Apache Tika
    - Configure vLLM service (optional)
 
-3. **🔄 Finally: LiteLLM Setup**
+4. **🔄 Finally: LiteLLM Setup**
    - Deploy LiteLLM as a multi-provider gateway
    - Configure Redis caching and PostgreSQL tracking
    - Set up external access via ALB
 
-**👉 Continue to: [Setup OpenWebUI](./setup-openwebui/)**
+**👉 Next Steps:**
+- **First:** [Build Custom Image](./build-custom-image/)
+- **Then:** [Setup OpenWebUI](./setup-openwebui/)
 
 ## Setup Open Webui
 
