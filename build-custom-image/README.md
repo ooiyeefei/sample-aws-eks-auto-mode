@@ -103,4 +103,4 @@ COPY static/* /app/build/static/
 - ❌ No complex filesystem operations
 
 
-**Proceed over to [Setup OpenWebUI](./setup-openwebui/)**
+**Proceed over to [Setup OpenWebUI](./../setup-openwebui/)**
