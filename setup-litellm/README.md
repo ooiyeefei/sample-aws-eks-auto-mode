@@ -203,13 +203,24 @@ terraform destroy -target=aws_secretsmanager_secret.litellm_api_keys
 
 ## Completion
 
-🎉 **Setup Complete!** You now have a fully functional EKS Auto Mode cluster with:
+🎉 **LiteLLM Setup Complete!** You now have a multi-provider AI gateway with:
 
-- **Infrastructure**: EKS cluster with Auto Mode features
-- **OpenWebUI**: AI chat interface with S3 storage and PostgreSQL vector database
-- **LiteLLM**: Multi-provider gateway with Redis caching and usage tracking
+- **Multi-Provider Access**: Route requests to different LLM providers
+- **Cost Tracking**: Monitor usage and costs across providers
+- **Redis Caching**: Improved performance with caching
+- **Usage Analytics**: Track and analyze API usage
 
-Your AI platform is ready for production workloads with enterprise-grade security, scalability, and cost optimization.
+## Next Steps
+
+🔄 **Continue to Step 5**: Complete your AI platform with web search capabilities.
+
+**👉 Next: [Setup SearXNG](../setup-searxng/)**
+
+SearXNG will provide:
+- Privacy-focused web search integration
+- Enhanced RAG capabilities with real-time web data
+- Seamless integration with OpenWebUI
+- Complete AI platform with documents + web + LLM
 
 ## Support
 

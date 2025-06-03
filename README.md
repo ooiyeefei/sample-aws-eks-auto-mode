@@ -6,6 +6,7 @@
 - [Quick Start](#quick-start)
 - [Setup Open Webui](#setup-open-webui)
 - [Setup LiteLLM](#setup-litellm)
+- [Setup SearXNG](#setup-searxng)
 - [Cleanup](#cleanup)
 - [Contributing](#contributing)
 - [License and Disclaimer](#license-and-disclaimer)
@@ -100,10 +101,16 @@ This project follows a sequential setup process:
    - Set up Apache Tika
    - Configure vLLM service (optional)
 
-4. **🔄 Finally: LiteLLM Setup**
+4. **🔄 LiteLLM Setup**
    - Deploy LiteLLM as a multi-provider gateway
    - Configure Redis caching and PostgreSQL tracking
    - Set up external access via ALB
+
+5. **🔍 SearXNG Setup**
+   - Deploy privacy-focused web search engine
+   - Enable web search capabilities in OpenWebUI
+   - Complete RAG pipeline with real-time web data
+   - Final step for comprehensive AI platform
 
 **👉 Next Steps:**
 - **First:** [Build Custom Image](./build-custom-image/)
@@ -154,6 +161,43 @@ LiteLLM acts as a proxy that can route requests to multiple LLM providers (inclu
 - Admin UI for configuration
 
 For detailed setup instructions, proceed to [setup-litellm](./setup-litellm/)
+
+## Setup SearXNG
+
+This project includes a SearXNG deployment that provides:
+- Privacy-focused metasearch engine with no user tracking
+- Aggregated results from multiple search engines and databases
+- JSON API integration for OpenWebUI web search capabilities
+- Redis caching for improved search performance
+- Complete RAG pipeline with real-time web data
+
+SearXNG enhances OpenWebUI with web search capabilities, enabling:
+
+🔍 **Web Search Integration**
+- Real-time web search results in chat responses
+- Privacy-focused search without user tracking
+- Aggregated results from multiple search engines
+- Seamless integration with existing RAG pipeline
+
+🌐 **Enhanced RAG Capabilities**
+- Combine document knowledge with live web data
+- Up-to-date information for current events
+- Comprehensive answers using multiple data sources
+- Improved context for AI responses
+
+⚡ **Performance & Privacy**
+- Redis caching for faster search responses
+- No user tracking or profiling
+- Internal service deployment for security
+- Shared across all OpenWebUI tenants
+
+🔧 **Easy Integration**
+- Automatic configuration with OpenWebUI
+- Toggle web search on/off per conversation
+- JSON API optimized for AI integration
+- Multi-tenant ready deployment
+
+For detailed setup instructions, proceed to [setup-searxng](./setup-searxng/)
 
 ## Cleanup
 

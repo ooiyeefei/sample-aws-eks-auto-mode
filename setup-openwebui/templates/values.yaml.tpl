@@ -84,6 +84,18 @@ extraEnvVars:
   - name: "TIKA_SERVER_URL"
     value: "http://tika.vllm-inference.svc.cluster.local:9998"
   
+  # SearXNG Web Search Configuration (Step 5 integration)
+  - name: "ENABLE_RAG_WEB_SEARCH"
+    value: "True"
+  - name: "RAG_WEB_SEARCH_ENGINE"
+    value: "searxng"
+  - name: "RAG_WEB_SEARCH_RESULT_COUNT"
+    value: "5"
+  - name: "RAG_WEB_SEARCH_CONCURRENT_REQUESTS"
+    value: "10"
+  - name: "SEARXNG_QUERY_URL"
+    value: "http://searxng.vllm-inference.svc.cluster.local:8080/search?q=<query>&format=json"
+  
 
 openaiBaseApiUrls: ["http://vllm-service/v1"]
 
