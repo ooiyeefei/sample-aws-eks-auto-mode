@@ -47,7 +47,6 @@ This deployment supports OAuth/SSO authentication with Microsoft Azure AD and ot
    ```bash
    # Run the OAuth secrets update script
    ./update-oauth-secrets.sh
-   kubectl apply -f oauth-secret.yaml
    ```
    
    This script will:
@@ -82,6 +81,9 @@ kubectl apply -f secret.yaml
 
 # Apply the OAuth ConfigMap for non-sensitive OAuth settings
 kubectl apply -f oauth-config.yaml
+
+# Apply the OAuth ExternalSecrets for sensitive OAuth settings
+kubectl apply -f oauth-secret.yaml
 ```
 
 > **Note**: The ClusterSecretStore configures access to AWS Secrets Manager, and the External Secret will automatically fetch the database credentials. This approach eliminates hardcoded credentials and follows security best practices.
