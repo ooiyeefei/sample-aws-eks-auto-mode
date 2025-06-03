@@ -2,30 +2,35 @@
 
 > **📋 Step 2 of 3**: This should be completed after the main Terraform infrastructure deployment.
 
-## Custom GAR GPT Branding
+## Custom GAR GPT Branding - Version 0.0.7
 
-This deployment uses a **custom OpenWebUI image** with GAR GPT branding that replaces all OpenWebUI references and logos. The custom image is pre-built and available in ECR.
+This deployment uses a **custom OpenWebUI image v0.0.7** with GAR GPT branding using a minimal approach that maintains database compatibility. The custom image is pre-built and available in ECR.
 
-### Custom Image Features:
-- **Branding**: All "Open WebUI" text replaced with "GAR GPT"
-- **Logo**: Custom GAR logo used as favicon and brand image
-- **UI Cleanup**: Hidden OpenWebUI documentation and community links
-- **Dynamic Updates**: JavaScript automatically replaces branding in dynamically loaded content
+### Version 0.0.7 Features:
+- ✅ **GAR GPT Branding**: All "Open WebUI" text replaced with "GAR GPT"
+- ✅ **Custom Logo**: GAR logo used as favicon and brand image
+- ✅ **UI Cleanup**: Hidden OpenWebUI documentation and community links
+- ✅ **Dynamic Updates**: JavaScript automatically replaces branding in dynamically loaded content
+- ✅ **Embedded Assets**: All branding built into the image (no ConfigMaps needed)
+- ✅ **Improved Reliability**: Enhanced container startup and filesystem permissions
 
-### Building Your Own Custom Image (Optional)
+### Building Your Own Custom Image
 
-If you need to modify the branding or update the image:
+To modify the branding or update the image:
 
 1. **Navigate to custom image directory**:
    ```bash
    cd custom-image/
    ```
 
-2. **Follow the build instructions** in `custom-image/README.md`
+2. **Run the automated build script**:
+   ```bash
+   ./build-v0.0.7.sh
+   ```
 
-3. **Update the image tag** in `templates/values.yaml.tpl` to use your new version
+3. **Follow the detailed instructions** in `custom-image/README.md`
 
-The current deployment uses: `public.ecr.aws/v2f5y6u4/openwebui/custom-build:v0.0.1`
+The current deployment uses: `public.ecr.aws/v2f5y6u4/openwebui/custom-build:v0.0.7`
 
 ## Prerequisites
 
@@ -56,9 +61,9 @@ This deployment supports OAuth/SSO authentication with Microsoft Azure AD and ot
    OPENID_PROVIDER_URL=https://your-openid-provider-url/openid-configuration
    ```
 
-2. **Configure non-sensitive OAuth settings** in `asset-configmaps.yaml`:
+2. **Configure non-sensitive OAuth settings** in the deployment:
    
-   Update these values in the openwebui-oauth-config ConfigMap:
+   The OAuth configuration is handled through Kubernetes ConfigMaps that are created during deployment. The default values are:
    ```yaml
    ENABLE_OAUTH_SIGNUP: "true"
    OAUTH_PROVIDER_NAME: "Sinarmas (SSO)"
@@ -72,6 +77,7 @@ This deployment supports OAuth/SSO authentication with Microsoft Azure AD and ot
    ```bash
    # Run the OAuth secrets update script
    ./update-oauth-secrets.sh
+   kubectl apply -f oauth-secret.yaml
    ```
    
    This script will:
@@ -81,11 +87,6 @@ This deployment supports OAuth/SSO authentication with Microsoft Azure AD and ot
 
    > **Note**: The Terraform deployment creates the OAuth secret in AWS Secrets Manager automatically.
 
-## Asset Customization
-
-This deployment supports **configurable assets** that allow departments to customize logos and branding without rebuilding Docker images.
-
-> **See `assets/README.md`** for detailed asset customization instructions.
 
 ## Deployment Steps
 
@@ -108,6 +109,9 @@ kubectl apply -f cluster-secret-store.yaml
 
 # Apply the External Secret to fetch credentials from AWS Secrets Manager
 kubectl apply -f secret.yaml
+
+# Apply the OAuth ConfigMap for non-sensitive OAuth settings
+kubectl apply -f oauth-config.yaml
 ```
 
 > **Note**: The ClusterSecretStore configures access to AWS Secrets Manager, and the External Secret will automatically fetch the database credentials. This approach eliminates hardcoded credentials and follows security best practices.

@@ -46,6 +46,7 @@ terraform.rc
 nodepools/
 /setup-openwebui/values.yaml
 /setup-openwebui/secret.yaml
+/setup-openwebui/oauth-secret.yaml
 /setup-openwebui/pgvector-job.yaml
 /setup-openwebui/cluster-secret-store.yaml
 /setup-litellm/config.yaml

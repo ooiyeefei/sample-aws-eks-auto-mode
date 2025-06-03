@@ -1,9 +1,9 @@
-# Open WebUI Helm Chart Values - GAR GPT Custom Image
+# Open WebUI Helm Chart Values - GAR GPT Custom Image v0.0.9
 
-# Use custom GAR GPT branded image
+# Use custom GAR GPT branded image with minimal approach (database compatible)
 image:
   repository: public.ecr.aws/v2f5y6u4/openwebui/custom-build
-  tag: v0.0.1
+  tag: v0.0.9
   pullPolicy: IfNotPresent
 
 # Configure persistence to use S3
@@ -87,30 +87,10 @@ extraEnvVars:
 
 openaiBaseApiUrls: ["http://vllm-service/v1"]
 
-# Custom asset volume mounts (mirrors VM volume mount approach)
-extraVolumes:
-  - name: favicon-assets
-    configMap:
-      name: openwebui-favicon
-  - name: splash-assets
-    configMap:
-      name: openwebui-splash
-
-extraVolumeMounts:
-  # Favicon mounts
-  - name: favicon-assets
-    mountPath: /app/build/static/favicon.png
-    subPath: favicon.png
-  - name: favicon-assets
-    mountPath: /app/build/favicon.png
-    subPath: favicon.png
-  # Splash image mounts
-  - name: splash-assets
-    mountPath: /app/build/static/splash.png
-    subPath: splash.png
-  - name: splash-assets
-    mountPath: /app/build/static/splash-dark.png
-    subPath: splash-dark.png
+# Branding assets are now embedded in the custom image v0.0.2
+# No ConfigMap volume mounts needed
+# extraVolumes: []
+# extraVolumeMounts: []
 
 # Disable the embedded Ollama chart
 ollama:

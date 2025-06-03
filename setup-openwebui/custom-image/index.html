@@ -1,195 +1,402 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAR GPT</title>
-    
-    <!-- Custom GAR GPT Branding Scripts and Styles -->
-    <script>
-        // Function to update the title if it includes "Open WebUI"
-        const monitorTitleChange = () => {
-            // Select the <head> element, which contains the <title>
-            const targetNode = document.head;
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/png" href="/static/favicon.png" />
+		<link rel="icon" type="image/png" href="/static/favicon-96x96.png" sizes="96x96" />
+		<link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+		<link rel="shortcut icon" href="/static/favicon.ico" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+		<meta name="apple-mobile-web-app-title" content="Open WebUI" />
 
-            // Create a MutationObserver to monitor changes
-            const observer = new MutationObserver(() => {
-                // Replace "Open WebUI" with "GAR GPT" in the document title
-                if (document.title.includes("Open WebUI")) {
-                    document.title = document.title.replace("Open WebUI", "GAR GPT");
-                    console.log("Title updated to 'GAR GPT'.");
-                }
-            });
+		<link rel="manifest" href="/manifest.json" crossorigin="use-credentials" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+		/>
+		<meta name="theme-color" content="#171717" />
+		<meta name="robots" content="noindex,nofollow" />
+		<meta name="description" content="Open WebUI" />
+		<link
+			rel="search"
+			type="application/opensearchdescription+xml"
+			title="Open WebUI"
+			href="/opensearch.xml"
+		/>
+		<script src="/static/loader.js" defer></script>
 
-            // Observe the <head> for changes in child elements
-            observer.observe(targetNode, {
-                childList: true,
-                subtree: true
-            });
-        };
+		<script>
+			function resizeIframe(obj) {
+				obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+			}
+		</script>
 
-        // Function to detect the new div and replace its class
-        const monitorNewDiv = () => {
-            console.log("Starting to monitor for new <div>...");
+		<script>
+			// On page load or when changing themes, best to add inline in `head` to avoid FOUC
+			(() => {
+				const metaThemeColorTag = document.querySelector('meta[name="theme-color"]');
+				const prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-            const processDiv = () => {
-                // Query the DOM for the specific <div> with required classes
-                const newDiv = document.querySelector("div.w-full.h-screen");
+				if (!localStorage?.theme) {
+					localStorage.theme = 'system';
+				}
 
-                if (newDiv) {
-                    console.log("Target <div> found!");
+				if (localStorage.theme === 'system') {
+					document.documentElement.classList.add(prefersDarkTheme ? 'dark' : 'light');
+					metaThemeColorTag.setAttribute('content', prefersDarkTheme ? '#171717' : '#ffffff');
+				} else if (localStorage.theme === 'oled-dark') {
+					document.documentElement.style.setProperty('--color-gray-800', '#101010');
+					document.documentElement.style.setProperty('--color-gray-850', '#050505');
+					document.documentElement.style.setProperty('--color-gray-900', '#000000');
+					document.documentElement.style.setProperty('--color-gray-950', '#000000');
+					document.documentElement.classList.add('dark');
+					metaThemeColorTag.setAttribute('content', '#000000');
+				} else if (localStorage.theme === 'light') {
+					document.documentElement.classList.add('light');
+					metaThemeColorTag.setAttribute('content', '#ffffff');
+				} else if (localStorage.theme === 'her') {
+					document.documentElement.classList.add('dark');
+					document.documentElement.classList.add('her');
+					metaThemeColorTag.setAttribute('content', '#983724');
+				} else {
+					document.documentElement.classList.add('dark');
+					metaThemeColorTag.setAttribute('content', '#171717');
+				}
 
-                    // Locate the child element with the target class
-                    const targetElement = newDiv.querySelector(".text-2xl.font-medium");
-                    if (targetElement) {
-                        console.log("Found target element with 'text-2xl font-medium' class.");
+				window.matchMedia('(prefers-color-scheme: dark)').addListener((e) => {
+					if (localStorage.theme === 'system') {
+						if (e.matches) {
+							document.documentElement.classList.add('dark');
+							document.documentElement.classList.remove('light');
+							metaThemeColorTag.setAttribute('content', '#171717');
+						} else {
+							document.documentElement.classList.add('light');
+							document.documentElement.classList.remove('dark');
+							metaThemeColorTag.setAttribute('content', '#ffffff');
+						}
+					}
+				});
 
-                        // Replace the text content only if it contains "Open WebUI"
-                        if (targetElement.textContent.includes("Open WebUI")) {
-                            console.log("Replacing text 'Open WebUI' with 'GAR GPT'...");
-                            targetElement.textContent = targetElement.textContent.replace("Open WebUI", "GAR GPT");
-                        } else {
-                            console.log("Target element doesn't contain 'Open WebUI'.");
-                        }
-                    } else {
-                        console.log("No element with class 'text-2xl font-medium' found inside the target <div>.");
-                    }
-                } else {
-                    console.log("Target <div> not found.");
-                }
-            };
+				function setSplashImage() {
+					const logo = document.getElementById('logo');
+					const isDarkMode = document.documentElement.classList.contains('dark');
 
-            // Use 'load' and a small delay to ensure the DOM is fully ready
-            window.addEventListener("load", () => {
-                console.log("Page fully loaded. Checking for target <div>...");
-                processDiv();
-            });
+					if (isDarkMode) {
+						const darkImage = new Image();
+						darkImage.src = '/static/splash-dark.png';
 
-            // Optionally, run one additional check after a longer delay for dynamically injected content
-            setTimeout(processDiv, 500);
-            setTimeout(processDiv, 1000);
-            setTimeout(processDiv, 1500);
-            setTimeout(processDiv, 2000);
-            setTimeout(processDiv, 2500);
-            setTimeout(processDiv, 3000);
-            setTimeout(processDiv, 3500);
-            setTimeout(processDiv, 4000);
-            setTimeout(processDiv, 4500);
-            setTimeout(processDiv, 5000);
-            setTimeout(processDiv, 5500);
-            setTimeout(processDiv, 6000);
-            setTimeout(processDiv, 6500);
-            setTimeout(processDiv, 7000);
-        };
+						darkImage.onload = () => {
+							logo.src = '/static/splash-dark.png';
+							logo.style.filter = ''; // Ensure no inversion is applied if splash-dark.png exists
+						};
 
-        // Start monitoring
-        monitorTitleChange();
-        monitorNewDiv();
-    </script>
+						darkImage.onerror = () => {
+							logo.style.filter = 'invert(1)'; // Invert image if splash-dark.png is missing
+						};
+					}
+				}
 
-    <script>
-        (function() {
-            // Remove existing favicon links
-            var existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
-            existingFavicons.forEach(function(favicon) {
-                favicon.parentNode.removeChild(favicon);
-            });
+				// Runs after classes are assigned
+				window.onload = setSplashImage;
+			})();
+		</script>
 
-            // Add new favicon link using the custom GAR logo
-            var link = document.createElement('link');
-            link.rel = 'icon';
-            link.type = 'image/png';
-            link.href = '/static/gar-logo.png';
-            document.head.appendChild(link);
+		<title>Open WebUI</title>
 
-            // Optional: Also set the shortcut icon for older browsers
-            var shortcutLink = document.createElement('link');
-            shortcutLink.rel = 'shortcut icon';
-            shortcutLink.type = 'image/png';
-            shortcutLink.href = '/static/gar-logo.png';
-            document.head.appendChild(shortcutLink);
-        })();
-    </script>
+		<script>
+			// Function to update the title if it includes "Open WebUI"
+			const monitorTitleChange = () => {
+				// Select the <head> element, which contains the <title>
+				const targetNode = document.head;
 
-    <style>
-        /* Hide OpenWebUI branding elements */
-        .flex.w-full.text-center.items-center.justify-center.self-start.text-gray-400.dark\:text-gray-600 {
-            display: none;
-        }
-        .mb-3\.5:has(a[href="https://docs.openwebui.com/"]) {
-            display: none;
-        }
-        div.mb-2.text-xs.text-gray-400:has(a[href*="CONTRIBUTING.md"]) {
-            display: none;
-        }
-        div.space-y-3.overflow-y-scroll.max-h-\[28rem\].lg\:max-h-full:has(a[href*="discord.gg"]) {
-            display: none;
-        }
-        div.mx-auto.max-w-2xl.font-primary > div.mx-5 > div.mb-1.flex > div:first-child {
-            display: none !important;
-        }
-        
-        /* Additional branding customizations */
-        .logo, .brand-logo {
-            content: url('/static/gar-logo.png') !important;
-        }
-        
-        /* Replace any OpenWebUI text that might appear */
-        *:contains("Open WebUI") {
-            visibility: hidden;
-        }
-        *:contains("Open WebUI"):before {
-            content: "GAR GPT";
-            visibility: visible;
-        }
-    </style>
+				// Create a MutationObserver to monitor changes
+				const observer = new MutationObserver(() => {
+					// Replace "Open WebUI" with "GAR GPT" in the document title
+					if (document.title.includes("Open WebUI")) {
+						document.title = document.title.replace("Open WebUI", "GAR GPT");
+						console.log("Title updated to 'GAR GPT'.");
+					}
+				});
 
-    <!-- Original OpenWebUI head content will be injected here by the application -->
-    <script type="module" crossorigin src="/static/index-BQw_7Jfm.js"></script>
-    <link rel="stylesheet" crossorigin href="/static/index-D6_YjMp2.css">
-</head>
-<body>
-    <!-- The OpenWebUI application will mount here -->
-    <div id="app"></div>
-    
-    <!-- Additional script to handle dynamic content replacement -->
-    <script>
-        // Monitor for dynamic content changes and replace OpenWebUI references
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.nodeType === Node.TEXT_NODE) {
-                            if (node.textContent.includes('Open WebUI')) {
-                                node.textContent = node.textContent.replace(/Open WebUI/g, 'GAR GPT');
-                            }
-                        } else if (node.nodeType === Node.ELEMENT_NODE) {
-                            // Check all text nodes within the added element
-                            const walker = document.createTreeWalker(
-                                node,
-                                NodeFilter.SHOW_TEXT,
-                                null,
-                                false
-                            );
-                            let textNode;
-                            while (textNode = walker.nextNode()) {
-                                if (textNode.textContent.includes('Open WebUI')) {
-                                    textNode.textContent = textNode.textContent.replace(/Open WebUI/g, 'GAR GPT');
-                                }
-                            }
-                        }
-                    });
-                }
-            });
-        });
+				// Observe the <head> for changes in child elements
+				observer.observe(targetNode, {
+					childList: true,
+					subtree: true
+				});
+			};
 
-        // Start observing when DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-        });
-    </script>
-</body>
+			// Function to detect the new div and replace its class
+			const monitorNewDiv = () => {
+				console.log("Starting to monitor for new <div>...");
+
+				const processDiv = () => {
+					// Query the DOM for the specific <div> with required classes
+					const newDiv = document.querySelector("div.w-full.h-screen");
+
+					if (newDiv) {
+						console.log("Target <div> found!");
+
+						// Locate the child element with the target class
+						const targetElement = newDiv.querySelector(".text-2xl.font-medium");
+						if (targetElement) {
+							console.log("Found target element with 'text-2xl font-medium' class.");
+
+							// Replace the text content only if it contains "Open WebUI"
+							if (targetElement.textContent.includes("Open WebUI")) {
+								console.log("Replacing text 'Open WebUI' with 'GAR GPT'...");
+								targetElement.textContent = targetElement.textContent.replace("Open WebUI", "GAR GPT");
+							} else {
+								console.log("Target element doesn't contain 'Open WebUI'.");
+							}
+						} else {
+							console.log("No element with class 'text-2xl font-medium' found inside the target <div>.");
+						}
+					} else {
+						console.log("Target <div> not found.");
+					}
+				};
+
+				// Use 'load' and a small delay to ensure the DOM is fully ready
+				window.addEventListener("load", () => {
+					console.log("Page fully loaded. Checking for target <div>...");
+					processDiv();
+				});
+
+				// Optionally, run one additional check after a longer delay for dynamically injected content
+				setTimeout(processDiv, 500);
+				setTimeout(processDiv, 1000);
+				setTimeout(processDiv, 1500);
+				setTimeout(processDiv, 2000);
+				setTimeout(processDiv, 2500);
+				setTimeout(processDiv, 3000);
+				setTimeout(processDiv, 3500);
+				setTimeout(processDiv, 4000);
+				setTimeout(processDiv, 4500);
+				setTimeout(processDiv, 5000);
+				setTimeout(processDiv, 5500);
+				setTimeout(processDiv, 6000);
+				setTimeout(processDiv, 6500);
+				setTimeout(processDiv, 7000);
+			};
+
+			// Start monitoring
+			monitorTitleChange();
+			monitorNewDiv();
+		</script>
+
+		<script>
+			(function() {
+				// Remove existing favicon links
+				var existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+				existingFavicons.forEach(function(favicon) {
+					favicon.parentNode.removeChild(favicon);
+				});
+
+				// Add new favicon link
+				var link = document.createElement('link');
+				link.rel = 'icon';
+				link.type = 'image/png';
+				link.href = '/static/gar-logo.png';
+				document.head.appendChild(link);
+
+				// Optional: Also set the shortcut icon for older browsers
+				var shortcutLink = document.createElement('link');
+				shortcutLink.rel = 'shortcut icon';
+				shortcutLink.type = 'image/png';
+				shortcutLink.href = '/static/gar-logo.png';
+				document.head.appendChild(shortcutLink);
+			})();
+		</script>
+
+		<style>
+			.flex.w-full.text-center.items-center.justify-center.self-start.text-gray-400.dark\:text-gray-600 {
+				display: none;
+			}
+			.mb-3\.5:has(a[href="https://docs.openwebui.com/"]) {
+				display: none;
+			}
+			div.mb-2.text-xs.text-gray-400:has(a[href*="CONTRIBUTING.md"]) {
+				display: none;
+			}
+			div.space-y-3.overflow-y-scroll.max-h-\[28rem\].lg\:max-h-full:has(a[href*="discord.gg"]) {
+				display: none;
+			}
+			div.mx-auto.max-w-2xl.font-primary > div.mx-5 > div.mb-1.flex > div:first-child {
+				display: none !important;
+			}
+		</style>
+
+		
+		<link rel="modulepreload" href="/_app/immutable/entry/start.CahpDyJ2.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/wsYjlzPw.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/Bpbbr8c4.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/CqsuE29G.js">
+		<link rel="modulepreload" href="/_app/immutable/entry/app.PU6hndI7.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/C1FmrZbK.js">
+		<link rel="modulepreload" href="/_app/immutable/chunks/DqnutP3R.js">
+	</head>
+
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">
+			<script>
+				{
+					__sveltekit_2jil04 = {
+						base: ""
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("/_app/immutable/entry/start.CahpDyJ2.js"),
+						import("/_app/immutable/entry/app.PU6hndI7.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+
+		<div
+			id="splash-screen"
+			style="position: fixed; z-index: 100; top: 0; left: 0; width: 100%; height: 100%"
+		>
+			<style type="text/css" nonce="">
+				html {
+					overflow-y: scroll !important;
+				}
+			</style>
+
+			<img
+				id="logo"
+				style="
+					position: absolute;
+					width: auto;
+					height: 6rem;
+					top: 44%;
+					left: 50%;
+					transform: translateX(-50%);
+				"
+				src="/static/splash.png"
+			/>
+
+			<div
+				style="
+					position: absolute;
+					top: 33%;
+					left: 50%;
+
+					width: 24rem;
+					transform: translateX(-50%);
+
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+				"
+			>
+				<img
+					id="logo-her"
+					style="width: auto; height: 13rem"
+					src="/static/splash.png"
+					class="animate-pulse-fast"
+				/>
+
+				<div style="position: relative; width: 24rem; margin-top: 0.5rem">
+					<div
+						id="progress-background"
+						style="
+							position: absolute;
+							width: 100%;
+							height: 0.75rem;
+
+							border-radius: 9999px;
+							background-color: #fafafa9a;
+						"
+					></div>
+
+					<div
+						id="progress-bar"
+						style="
+							position: absolute;
+							width: 0%;
+							height: 0.75rem;
+							border-radius: 9999px;
+							background-color: #fff;
+						"
+						class="bg-white"
+					></div>
+				</div>
+			</div>
+
+			<!-- <span style="position: absolute; bottom: 32px; left: 50%; margin: -36px 0 0 -36px">
+				Footer content
+			</span> -->
+		</div>
+	</body>
 </html>
+
+<style type="text/css" nonce="">
+	html {
+		overflow-y: hidden !important;
+	}
+
+	#splash-screen {
+		background: #fff;
+	}
+
+	html.dark #splash-screen {
+		background: #000;
+	}
+
+	html.her #splash-screen {
+		background: #983724;
+	}
+
+	#logo-her {
+		display: none;
+	}
+
+	#progress-background {
+		display: none;
+	}
+
+	#progress-bar {
+		display: none;
+	}
+
+	html.her #logo {
+		display: none;
+	}
+
+	html.her #logo-her {
+		display: block;
+		filter: invert(1);
+	}
+
+	html.her #progress-background {
+		display: block;
+	}
+
+	html.her #progress-bar {
+		display: block;
+	}
+
+	@media (max-width: 24rem) {
+		html.her #progress-background {
+			display: none;
+		}
+
+		html.her #progress-bar {
+			display: none;
+		}
+	}
+
+	@keyframes pulse {
+		50% {
+			opacity: 0.65;
+		}
+	}
+
+	.animate-pulse-fast {
+		animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+</style>

@@ -1,7 +1,7 @@
 # External Secret for OAuth Configuration
 # This fetches sensitive OAuth credentials from AWS Secrets Manager and creates a Kubernetes Secret
 
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: oauth-external-secret

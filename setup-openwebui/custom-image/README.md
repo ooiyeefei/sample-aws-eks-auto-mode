@@ -1,136 +1,104 @@
 # Custom OpenWebUI Image - GAR GPT Branding
 
-This directory contains the files needed to build a custom OpenWebUI Docker image with GAR GPT branding, replacing all OpenWebUI references and logos.
+This directory contains the files and scripts needed to build a custom OpenWebUI image with GAR GPT branding.
+
+## Version 0.0.7 - Minimal Approach
+
+Version 0.0.7 uses a **minimal approach** that maintains full database compatibility while adding GAR GPT branding. This approach was developed after discovering that complex permission fixes and environment variable modifications were causing database connection issues.
+
+### Key Features
+
+- ✅ **Database Compatible**: Works with PostgreSQL/RDS without connection issues
+- ✅ **GAR GPT Branding**: Complete branding replacement with JavaScript
+- ✅ **Minimal Dockerfile**: Only copies necessary files, no system modifications
+- ✅ **Proper Asset Extraction**: Uses current OpenWebUI image as source
+- ✅ **Local Static Assets**: Favicon points to local GAR logo
 
 ## Files Overview
 
-- `Dockerfile` - Docker build configuration
-- `index.html` - Customized HTML with GAR GPT branding and JavaScript modifications
-- `static/gar-logo.png` - Custom GAR logo (copied from `../image.png`)
+```
+custom-image/
+├── Dockerfile                    # Minimal Dockerfile (v0.0.7)
+├── extract-and-modify-index.sh   # Script to extract and modify index.html
+├── build-v0.0.7.sh              # Build script for version 0.0.7
+├── README.md                     # This file
+├── static/                       # Static assets directory
+│   ├── gar-logo.png             # GAR logo (required)
+│   ├── splash.png               # Splash screen logo
+│   └── splash-dark.png          # Dark theme splash logo
+├── index.html                    # Modified index.html (generated)
+└── index-original.html           # Backup of original (generated)
+```
 
-## Customizations Applied
-
-### Branding Changes
-- **Title**: "Open WebUI" → "GAR GPT"
-- **Favicon**: Custom GAR logo
-- **Logo**: All images replaced with GAR logo
-- **Text**: All "Open WebUI" references replaced with "GAR GPT"
-
-### Hidden Elements
-- OpenWebUI documentation links
-- Contributing links
-- Discord community links
-- Default branding elements
-
-### Dynamic Content Handling
-- JavaScript monitors for dynamically loaded content
-- Automatically replaces "Open WebUI" text as it appears
-- Handles title changes and UI updates
-
-## Building the Custom Image
+## Quick Start
 
 ### Prerequisites
 
-1. **Docker installed** on your build machine
-2. **AWS CLI configured** with access to ECR
-3. **ECR repository** created (public registry)
+- Docker installed and running
+- AWS CLI configured (for ECR push)
+- GAR logo image file
 
-### Step 1: Extract Original index.html (Optional)
+### Step 1: Prepare Static Assets
 
-If you need to update the base `index.html`, extract it from the original container:
+Create the required static assets in the `static/` directory:
 
 ```bash
-# Pull the latest OpenWebUI image
-docker pull ghcr.io/open-webui/open-webui:main
-
-# Create a temporary container
-docker run -d --name temp-openwebui ghcr.io/open-webui/open-webui:main
-
-# Extract the original index.html
-docker cp temp-openwebui:/app/build/index.html ./index-original.html
-
-# Clean up
-docker stop temp-openwebui
-docker rm temp-openwebui
-
-# Compare with your customized version if needed
+# Ensure you have these files:
+static/gar-logo.png      # Your GAR logo (32x32 or larger PNG)
+static/splash.png        # Can be same as gar-logo.png
+static/splash-dark.png   # Can be same as gar-logo.png
 ```
 
-### Step 2: Build the Custom Image
-
-Navigate to this directory and build the image:
+### Step 2: Extract and Modify index.html
 
 ```bash
-# Build the image with version tag
-docker build -t openwebui/custom-build:v0.0.1 .
-
-# Also tag as latest for convenience
-docker tag openwebui/custom-build:v0.0.1 openwebui/custom-build:latest
+# Run the extraction script
+./extract-and-modify-index.sh
 ```
 
-### Step 3: Test the Image Locally (Optional)
+This script will:
+- Pull the latest OpenWebUI image
+- Extract the current `index.html`
+- Add GAR GPT branding scripts
+- Create the modified `index.html`
 
-Test your custom image before pushing:
+### Step 3: Build the Custom Image
 
 ```bash
-# Run the custom image locally
-docker run -d -p 3000:8080 --name test-gar-gpt openwebui/custom-build:v0.0.1
-
-# Access at http://localhost:3000 to verify branding
-# Check that:
-# - Title shows "GAR GPT"
-# - Favicon is the GAR logo
-# - All "Open WebUI" text is replaced
-# - OpenWebUI branding elements are hidden
-
-# Clean up test container
-docker stop test-gar-gpt
-docker rm test-gar-gpt
+# Build version 0.0.7
+./build-v0.0.7.sh
 ```
 
-### Step 4: Push to ECR
-
-Login to AWS ECR and push the image:
+### Step 4: Push to Registry
 
 ```bash
-# Login to ECR public registry
+# Login to ECR
 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/v2f5y6u4
 
-# Tag for ECR
-docker tag openwebui/custom-build:v0.0.1 public.ecr.aws/v2f5y6u4/openwebui/custom-build:v0.0.1
-docker tag openwebui/custom-build:latest public.ecr.aws/v2f5y6u4/openwebui/custom-build:latest
-
-# Push both tags
-docker push public.ecr.aws/v2f5y6u4/openwebui/custom-build:v0.0.1
+# Push the images
+docker push public.ecr.aws/v2f5y6u4/openwebui/custom-build:v0.0.7
 docker push public.ecr.aws/v2f5y6u4/openwebui/custom-build:latest
 ```
 
-## Using the Custom Image
+## Technical Details
 
-After building and pushing the image, update your Helm deployment to use the custom image:
+### Minimal Dockerfile Approach
 
-1. **Update values.yaml.tpl**: The main setup will reference your custom image
-2. **Deploy**: Use the standard OpenWebUI deployment process with the custom image
+The v0.0.7 Dockerfile is intentionally minimal:
 
-## Version Management
+```dockerfile
+FROM ghcr.io/open-webui/open-webui:main
 
-### Current Version: v0.0.1
+# Copy the modified index.html with GAR GPT branding
+COPY index.html /app/build/index.html
 
-### Updating the Image
+# Copy static assets (GAR logo, splash images)
+COPY static/* /app/build/static/
+```
 
-When you need to update the branding or fix issues:
-
-1. **Increment version**: Update to v0.0.2, v0.0.3, etc.
-2. **Modify files**: Update `index.html`, add new static assets, etc.
-3. **Rebuild**: Follow the build process with the new version tag
-4. **Update deployment**: Modify `values.yaml.tpl` to use the new version
-5. **Redeploy**: Apply the updated Helm chart
-
-### Version History
-
-- **v0.0.1**: Initial GAR GPT branding
-  - Replaced all "Open WebUI" with "GAR GPT"
-  - Added custom GAR logo as favicon and brand image
-  - Hidden OpenWebUI documentation and community links
-  - Added dynamic content monitoring
-
+**What we DON'T do (that caused issues in previous versions):**
+- ❌ No user switching (`USER root` → `USER 1000`)
+- ❌ No permission modifications (`chown`, `chmod`)
+- ❌ No working directory changes (`WORKDIR`)
+- ❌ No environment variables (`ENV PGSSLMODE`, etc.)
+- ❌ No complex filesystem operations

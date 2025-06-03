@@ -1,17 +1,11 @@
+FROM ghcr.io/open-webui/open-webui:main as source
 FROM ghcr.io/open-webui/open-webui:main
 
-# Copy customized index.html with GAR GPT branding
-COPY index.html /app/build/index.html
+# Copy ALL static assets from the original image first
+COPY --from=source /app/build/static/ /app/build/static/
 
-# Copy custom static assets (logos, icons, etc.)
+# Then copy our custom assets (this will overwrite any duplicates like gar-logo.png)
 COPY static/* /app/build/static/
 
-# Maintain the same user and permissions as the base image
-USER root
-RUN chown -R 1000:1000 /app/build/
-USER 1000
-
-# Expose the same port as the base image
-EXPOSE 8080
-
-# Use the same entrypoint as the base image
+# Copy our modified index.html with GAR GPT branding
+COPY index.html /app/build/index.html
