@@ -1,3 +1,6 @@
+# Data source to get current AWS caller identity (like EKS cluster creator pattern)
+data "aws_caller_identity" "current" {}
+
 # S3 bucket for Open WebUI document storage
 resource "aws_s3_bucket" "openwebui_docs" {
   bucket_prefix = "${var.name}-openwebui-docs-"  # Changed from fixed name to prefix for global uniqueness
@@ -30,6 +33,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "openwebui_docs" {
 }
 
 # S3 Bucket Policy for VPC Endpoint and Pod Identity Security
+# Uses cluster creator pattern like EKS - allows account root access for administration
 resource "aws_s3_bucket_policy" "openwebui_docs_policy" {
   bucket = aws_s3_bucket.openwebui_docs.id
 
@@ -37,7 +41,19 @@ resource "aws_s3_bucket_policy" "openwebui_docs_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "DenyDirectInternetAccess"
+        Sid    = "AllowAccountRootAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action = "s3:*"
+        Resource = [
+          aws_s3_bucket.openwebui_docs.arn,
+          "${aws_s3_bucket.openwebui_docs.arn}/*"
+        ]
+      },
+      {
+        Sid    = "DenyNonVPCEndpointForApplications"
         Effect = "Deny"
         Principal = "*"
         Action = "s3:*"
@@ -48,6 +64,13 @@ resource "aws_s3_bucket_policy" "openwebui_docs_policy" {
         Condition = {
           StringNotEquals = {
             "aws:sourceVpce" = aws_vpc_endpoint.s3.id
+          }
+          StringNotLike = {
+            "aws:PrincipalArn" = [
+              "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
+              "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/*",
+              "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/*"
+            ]
           }
         }
       },

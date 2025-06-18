@@ -15,8 +15,9 @@ Through the Terraform infrastructure deployment, **Container Insights has alread
 
 ✅ **Enhanced Container Insights** - Control plane and worker node metrics collection  
 ✅ **CloudWatch Integration** - Metrics stored in CloudWatch for analysis  
-✅ **Pod Identity** - Secure access using EKS Pod Identity  
-✅ **Cost Optimization** - Container logs disabled to reduce costs  
+✅ **Simplified Pod Identity** - Direct EKS add-on configuration with built-in Pod Identity  
+✅ **Cost Optimization** - Container logs disabled to reduce costs while keeping all metrics  
+✅ **Application Signals** - Automatic application performance monitoring enabled by default
 
 ## Infrastructure Observability
 

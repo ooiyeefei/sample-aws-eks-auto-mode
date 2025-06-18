@@ -117,7 +117,15 @@ This script will:
 
 ### Step 3: Build the Custom Image
 
+**For Private ECR (Recommended):**
 ```bash
+# Use the image URL provided by setup-private-ecr.sh
+./build-image.sh --image <account-id>.dkr.ecr.<region>.amazonaws.com/openwebui/custom-build:v0.1.0
+```
+
+**For Public ECR (Default):**
+```bash
+# Uses default public ECR (backward compatibility)
 ./build-image.sh
 ```
 

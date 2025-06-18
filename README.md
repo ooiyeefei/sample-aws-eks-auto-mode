@@ -216,16 +216,18 @@ This project includes comprehensive observability setup that provides:
 The observability setup monitors crucial control plane components to prevent issues like ETCD database lockdowns that can freeze entire clusters, based on real-world production incident prevention strategies.
 
 📊 **Infrastructure Observability**
-- Enhanced Container Insights automatically enabled via Terraform
+- Enhanced Container Insights automatically enabled via simplified EKS Pod Identity
 - Control plane metrics (ETCD, API server, admission controller)
 - Worker node and application performance monitoring
 - Built-in CloudWatch dashboards for immediate visibility
+- Cost-optimized configuration (metrics enabled, container logs disabled)
 
 💰 **Cost Observability**
 - Uniform tagging strategy across all AWS resources
 - AWS Cost Explorer integration for detailed cost analysis
 - Component-level cost breakdown and tracking
 - Optional KubeCost EKS add-on for Kubernetes-native cost monitoring (free)
+- Optimized CloudWatch costs through selective log collection
 
 🔍 **Key Monitoring Areas**
 - ETCD database size and performance (prevent lockdowns)
@@ -238,6 +240,12 @@ The observability setup monitors crucial control plane components to prevent iss
 - Historical trend analysis capabilities
 - Performance bottleneck identification
 - Capacity planning insights
+
+✨ **Simplified Setup**
+- Direct EKS add-on configuration with built-in Pod Identity
+- No external configuration files required
+- Streamlined IAM role management
+- Container Insights and Application Signals enabled by default
 
 For detailed setup instructions and dashboard configuration, proceed to [setup-o11y](./setup-o11y/)
 
