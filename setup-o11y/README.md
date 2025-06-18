@@ -29,90 +29,14 @@ Your cluster is now collecting comprehensive metrics. Here's how to access and u
 
 1. **Open AWS Console** and go to **CloudWatch**
 2. **In the left sidebar**, click **Insights** → **Container Insights**
-3. **Select your cluster** from the dropdown (cluster name: `automode-cluster`)
-4. **Choose the view**: 
-   - **Performance monitoring** - Overall cluster health
-   - **Container map** - Visual representation of your workloads
-   - **Resources** - Detailed resource utilization
+![alt text](image.png)
+![alt text](image-1.png)
 
-#### 2. Available Metrics and Dashboards
+Performance Dashboard:
+![alt text](image-2.png)
 
-**Control Plane Metrics** (Critical for preventing ETCD lockdowns):
-- **API Server Performance** - Request latency, throughput, errors
-- **ETCD Health** - Database size, request duration, storage objects
-- **Admission Controller** - Processing time and bottlenecks
-- **Scheduler Performance** - Pod scheduling metrics
-
-**Worker Node Metrics**:
-- **CPU and Memory Utilization** - Per node and pod level
-- **Network Performance** - Traffic, errors, packet loss
-- **Storage Metrics** - Disk usage, I/O performance
-- **Pod Performance** - Resource consumption, restart counts
-
-**Application Metrics** (for your deployed workloads):
-- **OpenWebUI Performance** - Response times, resource usage
-- **LiteLLM Gateway** - Request processing, error rates
-- **SearXNG Search** - Search performance, cache hit rates
-- **Database Performance** - RDS metrics integration
-
-#### 3. Using the Built-in Dashboards
-
-**Cluster Overview Dashboard**:
-- Navigate to **Container Insights** → **Performance monitoring**
-- View cluster-wide CPU, memory, network, and storage metrics
-- Monitor pod and service performance across namespaces
-
-**Node Performance Dashboard**:
-- Click on **EKS Nodes** tab
-- View individual node performance and resource utilization
-- Identify nodes that may need scaling or optimization
-
-**Pod Performance Dashboard**:
-- Click on **EKS Pods** tab
-- Monitor individual pod performance across all namespaces
-- Track resource consumption for OpenWebUI, LiteLLM, and SearXNG
-
-### Optional: Custom Control Plane Dashboard
-
-For advanced monitoring of EKS control plane components, you can create a custom dashboard based on the approach from [Marcin Cuber's article](https://medium.com/@marcincuber/amazon-eks-etcd-monitoring-and-alerting-using-container-insights-6a2c6c6c7f8e).
-
-#### Benefits of Custom Dashboard:
-- **Focused Control Plane Metrics** - ETCD, API server, admission controller
-- **Historical Trend Analysis** - Track performance over time
-- **Proactive Issue Detection** - Identify problems before they cause outages
-- **Custom Alerting** - Set up alerts for critical thresholds
-
-#### Dashboard Components:
-The custom dashboard includes 4 key widgets:
-
-1. **API Server Requests** - Total requests and average duration
-2. **API Server Storage Objects** - Object count and storage size in bytes
-3. **Admission Controller & ETCD Duration** - Processing latency metrics
-4. **REST Client Requests** - Client request metrics and duration
-
-#### Setup Instructions:
-
-1. **Navigate to CloudWatch Dashboards**:
-   ```bash
-   # Open AWS Console → CloudWatch → Dashboards
-   ```
-
-2. **Create New Dashboard**:
-   - Click **Create dashboard**
-   - Name it `EKS-Control-Plane-${CLUSTER_NAME}`
-   - Choose **Line** widget type
-
-3. **Import Dashboard Template**:
-   - Use the provided template in `dashboard-templates/eks-control-plane-dashboard.json`
-   - Replace `CLUSTER_NAME` with your cluster name (`automode-cluster`)
-   - Replace `ACCOUNT_ID` with your AWS account ID
-
-4. **Customize Metrics**:
-   - Adjust time ranges and refresh intervals
-   - Add additional metrics as needed
-   - Set up custom alerts based on thresholds
-
-> **Note**: The dashboard template is provided in the `dashboard-templates/` directory for advanced users who want detailed control plane monitoring.
+Resource Performance:
+![alt text](image-3.png)
 
 ## Cost Observability
 
@@ -194,22 +118,6 @@ With the uniform tagging in place, you can now track costs effectively:
 - **Filter**: Blueprint = `automode-cluster`
 - **Time Range**: Last 30 days or custom range
 
-#### 3. Cost Breakdown Analysis
-**By Service**:
-- **EKS Cluster** - Control plane costs
-- **EC2 Instances** - Worker node costs (Auto Mode managed)
-- **RDS** - Database costs (OpenWebUI + LiteLLM)
-- **S3** - Storage costs (document storage)
-- **CloudWatch** - Monitoring and logging costs
-- **Load Balancers** - Application Load Balancer costs
-
-**By Component**:
-- Filter by specific component tags to see costs for:
-  - OpenWebUI infrastructure
-  - LiteLLM gateway resources
-  - SearXNG search infrastructure
-  - Observability stack costs
-
 ### Optional: KubeCost Integration
 
 > **Free AWS Marketplace Add-on**: KubeCost standard bundle available at no additional charge
@@ -227,7 +135,7 @@ KubeCost provides detailed cost visibility at the Kubernetes workload level, com
 #### **Deployment Steps:**
 
 1. **Subscribe to KubeCost on AWS Marketplace**:
-   - Visit [KubeCost on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-3ue3gp6j7ywxs)
+   - Visit [KubeCost on AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-asiz4x22pm2n2?applicationId=AWSMPContessa&ref_=beagle&sr=0-1)
    - Click "Continue to Subscribe" (free for standard bundle)
    - Complete the subscription process
 
