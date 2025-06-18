@@ -33,41 +33,16 @@ resource "aws_vpc_endpoint" "s3" {
   # Associate with private subnet route tables
   route_table_ids = module.vpc.private_route_table_ids
   
-  # VPC Endpoint policy - conditional access based on resource
+  # VPC Endpoint policy - allow access from VPC (tenant isolation enforced at bucket level)
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "AllowOpenWebUIBucketAccessFromPodIdentityOnly"
-        Effect = "Allow"
-        Principal = "*"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:ListBucket",
-          "s3:GetBucketLocation"
-        ]
-        Resource = [
-          aws_s3_bucket.openwebui_docs.arn,
-          "${aws_s3_bucket.openwebui_docs.arn}/*"
-        ]
-        Condition = {
-          StringEquals = {
-            "aws:sourceVpc" = module.vpc.vpc_id
-            "aws:PrincipalArn" = module.openwebui_pod_identity.iam_role_arn
-          }
-        }
-      },
-      {
-        Sid    = "AllowAllOtherS3AccessFromVPC"
+        Sid    = "AllowVPCAccess"
         Effect = "Allow"
         Principal = "*"
         Action = "s3:*"
-        NotResource = [
-          aws_s3_bucket.openwebui_docs.arn,
-          "${aws_s3_bucket.openwebui_docs.arn}/*"
-        ]
+        Resource = "*"
         Condition = {
           StringEquals = {
             "aws:sourceVpc" = module.vpc.vpc_id

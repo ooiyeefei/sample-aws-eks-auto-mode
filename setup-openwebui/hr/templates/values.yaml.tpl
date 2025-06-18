@@ -82,7 +82,7 @@ extraEnvVars:
   
   # Apache Tika configuration for document processing
   - name: "TIKA_SERVER_URL"
-    value: "http://tika.vllm-inference.svc.cluster.local:9998"
+    value: "http://tika.${shared_namespace}.svc.cluster.local:9998"
   
   # SearXNG Web Search Configuration (Step 5 integration)
   - name: "ENABLE_RAG_WEB_SEARCH"
@@ -94,7 +94,7 @@ extraEnvVars:
   - name: "RAG_WEB_SEARCH_CONCURRENT_REQUESTS"
     value: "10"
   - name: "SEARXNG_QUERY_URL"
-    value: "http://searxng.vllm-inference.svc.cluster.local:8080/search?q=<query>&format=json"
+    value: "http://searxng.${shared_namespace}.svc.cluster.local:8080/search?q=<query>&format=json"
   
 
 openaiBaseApiUrls: ["http://vllm-service/v1"]

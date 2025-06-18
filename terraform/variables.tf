@@ -28,3 +28,26 @@ variable "enable_kubecost" {
   type        = bool
   default     = false
 }
+
+# Multi-tenant configuration
+variable "tenants" {
+  description = "Map of tenant configurations for multi-tenant OpenWebUI setup"
+  type = map(object({
+    name      = string
+    namespace = string
+  }))
+  default = {
+    legal = {
+      name      = "legal"
+      namespace = "legal-webui"
+    }
+    hr = {
+      name      = "hr"
+      namespace = "hr-webui"
+    }
+    us = {
+      name      = "us"
+      namespace = "us-webui"
+    }
+  }
+}

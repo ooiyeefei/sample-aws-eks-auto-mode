@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: pgvector-setup
-  namespace: vllm-inference
+  namespace: ${namespace}
 spec:
   ttlSecondsAfterFinished: 100
   template:

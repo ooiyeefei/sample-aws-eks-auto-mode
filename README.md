@@ -96,11 +96,12 @@ This project follows a sequential setup process:
    - Optimize image for your organization's requirements
    - Essential step before deploying OpenWebUI services
 
-3. **📋 Next: OpenWebUI Setup**
-   - Deploy OpenWebUI with S3 and PostgreSQL integration
-   - Set up vector database with pgvector
-   - Set up Apache Tika
-   - Configure vLLM service (optional)
+3. **📋 Next: Multi-Tenant OpenWebUI Setup**
+   - Deploy OpenWebUI with multi-tenant architecture (HR, Legal, US)
+   - Separate S3 buckets and PostgreSQL databases per tenant
+   - Set up vector database with pgvector per tenant
+   - Set up shared Apache Tika service
+   - Configure shared vLLM service (optional)
 
 4. **🔄 LiteLLM Setup**
    - Deploy LiteLLM as a multi-provider gateway
@@ -124,15 +125,36 @@ This project follows a sequential setup process:
 
 ## Setup Open Webui
 
-This project includes an OpenWebUI deployment that uses:
-- S3 for document storage
-- RDS PostgreSQL with pgvector for vector embeddings
-- AWS Secrets Manager for secure credential management
-- Optional vLLM service for LLM inference
+This project includes a **multi-tenant OpenWebUI deployment** that supports three isolated tenants with shared infrastructure for cost optimization:
 
-The setup process includes automated creation of the pgvector extension through a Kubernetes Job, eliminating the need for manual database configuration. Database credentials are securely managed using AWS Secrets Manager and the External Secrets Operator, following security best practices.
+### **Multi-Tenant Architecture**
+- **HR Tenant**: Full features including web search capabilities
+- **Legal Tenant**: Document-focused deployment
+- **US Tenant**: Document-focused deployment
 
-For detailed setup instructions, proceed to [setup-openwebui](./setup-openwebui/)
+### **Shared Components** (Cost Optimized)
+- EKS Auto Mode cluster serving all tenants
+- Apache Tika for document processing
+- Optional vLLM inference service
+- Storage classes and networking
+
+### **Tenant-Specific Components** (Isolated)
+- **Separate S3 buckets** for document storage per tenant
+- **Separate PostgreSQL databases** with pgvector per tenant
+- **Dedicated load balancers** per tenant for external access
+- **Isolated Kubernetes namespaces** for complete separation
+- **Individual secrets management** per tenant
+
+### **Key Features**
+- **Complete Tenant Isolation**: Each tenant operates independently with no data sharing
+- **Cost Optimization**: Shared infrastructure reduces operational costs
+- **Scalable Architecture**: Easy to add new tenants or modify existing ones
+- **Security**: Pod Identity for S3 access, AWS Secrets Manager integration
+- **Automated Setup**: Terraform generates all tenant-specific configurations
+
+The setup process includes automated creation of the pgvector extension per tenant through Kubernetes Jobs, eliminating manual database configuration. All credentials are securely managed using AWS Secrets Manager and the External Secrets Operator.
+
+For detailed multi-tenant setup instructions, proceed to [setup-openwebui](./setup-openwebui/)
 
 ## Setup LiteLLM
 
