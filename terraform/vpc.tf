@@ -33,12 +33,12 @@ resource "aws_vpc_endpoint" "s3" {
   # Associate with private subnet route tables
   route_table_ids = module.vpc.private_route_table_ids
   
-  # VPC Endpoint policy for additional security
+  # VPC Endpoint policy - conditional access based on resource
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "AllowS3Access"
+        Sid    = "AllowOpenWebUIBucketAccessFromPodIdentityOnly"
         Effect = "Allow"
         Principal = "*"
         Action = [
@@ -48,12 +48,29 @@ resource "aws_vpc_endpoint" "s3" {
           "s3:ListBucket",
           "s3:GetBucketLocation"
         ]
-        Resource = "*"
+        Resource = [
+          aws_s3_bucket.openwebui_docs.arn,
+          "${aws_s3_bucket.openwebui_docs.arn}/*"
+        ]
         Condition = {
           StringEquals = {
-            "aws:PrincipalServiceName" = [
-              "eks.amazonaws.com"
-            ]
+            "aws:sourceVpc" = module.vpc.vpc_id
+            "aws:PrincipalArn" = module.openwebui_pod_identity.iam_role_arn
+          }
+        }
+      },
+      {
+        Sid    = "AllowAllOtherS3AccessFromVPC"
+        Effect = "Allow"
+        Principal = "*"
+        Action = "s3:*"
+        NotResource = [
+          aws_s3_bucket.openwebui_docs.arn,
+          "${aws_s3_bucket.openwebui_docs.arn}/*"
+        ]
+        Condition = {
+          StringEquals = {
+            "aws:sourceVpc" = module.vpc.vpc_id
           }
         }
       }
@@ -62,11 +79,68 @@ resource "aws_vpc_endpoint" "s3" {
   
   tags = merge(local.tags, {
     Name = "${var.name}-s3-vpc-endpoint"
-    Purpose = "Secure S3 access for OpenWebUI"
+    Purpose = "Secure S3 access for ECR and OpenWebUI"
   })
 }
 
-# Output the VPC Endpoint ID for reference
+# Security group for VPC endpoints
+resource "aws_security_group" "vpc_endpoints" {
+  name_prefix = "${var.name}-vpc-endpoints-"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description = "HTTPS from VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(local.tags, {
+    Name = "${var.name}-vpc-endpoints-sg"
+  })
+}
+
+# ECR API VPC Endpoint
+resource "aws_vpc_endpoint" "ecr_api" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${var.region}.ecr.api"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+  
+  private_dns_enabled = true
+  
+  tags = merge(local.tags, {
+    Name = "${var.name}-ecr-api-vpc-endpoint"
+    Purpose = "ECR API access for image pulls"
+  })
+}
+
+# ECR Docker VPC Endpoint
+resource "aws_vpc_endpoint" "ecr_dkr" {
+  vpc_id              = module.vpc.vpc_id
+  service_name        = "com.amazonaws.${var.region}.ecr.dkr"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = module.vpc.private_subnets
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+  
+  private_dns_enabled = true
+  
+  tags = merge(local.tags, {
+    Name = "${var.name}-ecr-dkr-vpc-endpoint"
+    Purpose = "ECR Docker registry access for image pulls"
+  })
+}
+
+# Output the VPC Endpoint IDs for reference
 output "s3_vpc_endpoint_id" {
   description = "ID of the S3 VPC Endpoint"
   value       = aws_vpc_endpoint.s3.id

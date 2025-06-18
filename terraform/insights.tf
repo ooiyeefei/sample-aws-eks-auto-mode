@@ -6,7 +6,10 @@ resource "aws_iam_role" "cloudwatch_agent" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
+        Action = [
+          "sts:AssumeRole",
+          "sts:TagSession"
+        ]
         Effect = "Allow"
         Principal = {
           Service = "pods.eks.amazonaws.com"
@@ -28,6 +31,7 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy" {
 resource "aws_eks_addon" "amazon_cloudwatch_observability" {
   cluster_name  = module.eks.cluster_name
   addon_name    = "amazon-cloudwatch-observability"
+  addon_version = "v4.1.0-eksbuild.1"  # Add this line
   
   # Disable container logs to optimize costs while keeping Container Insights metrics
   configuration_values = jsonencode({
