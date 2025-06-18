@@ -9,17 +9,21 @@ data:
 ${model_list}
 
     litellm_settings:
-      success_callback: ["redis"]
-      cache: true
-      cache_params:
-        type: "redis"
-        host: "${redis_host}"
-        port: ${redis_port}
-        password: "${redis_password}"
-        ssl: true
-        ssl_certfile: null
-        ssl_keyfile: null
-        ssl_ca_certs: null
+      # COMMENTED OUT: Redis caching - using cloud provider caching instead
+      # success_callback: ["redis"]
+      # cache: true
+      # cache_params:
+      #   type: "redis"
+      #   host: "${redis_host}"
+      #   port: ${redis_port}
+      #   password: "${redis_password}"
+      #   ssl: true
+      #   ssl_certfile: null
+      #   ssl_keyfile: null
+      #   ssl_ca_certs: null
+      
+      # Use cloud provider caching instead
+      cache: false
 
     general_settings:
       # master_key and database_url will be set via environment variables

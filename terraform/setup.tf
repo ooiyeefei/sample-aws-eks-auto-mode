@@ -82,9 +82,10 @@ locals {
 resource "local_file" "setup_litellm_configmap" {
   content = templatefile("${path.module}/../setup-litellm/templates/configmap.yaml.tpl", {
     model_list = local.litellm_models_indented
-    redis_host = aws_elasticache_replication_group.litellm_redis.primary_endpoint_address
-    redis_port = aws_elasticache_replication_group.litellm_redis.port
-    redis_password = random_password.litellm_redis_password.result
+    # COMMENTED OUT: Redis variables - using cloud provider caching instead
+    # redis_host = aws_elasticache_replication_group.litellm_redis.primary_endpoint_address
+    # redis_port = aws_elasticache_replication_group.litellm_redis.port
+    # redis_password = random_password.litellm_redis_password.result
   })
   filename = "${path.module}/../setup-litellm/configmap.yaml"
 }
