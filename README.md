@@ -7,6 +7,7 @@
 - [Setup Open Webui](#setup-open-webui)
 - [Setup LiteLLM](#setup-litellm)
 - [Setup SearXNG](#setup-searxng)
+- [Setup Observability](#setup-observability)
 - [Cleanup](#cleanup)
 - [Contributing](#contributing)
 - [License and Disclaimer](#license-and-disclaimer)
@@ -110,7 +111,12 @@ This project follows a sequential setup process:
    - Deploy privacy-focused web search engine
    - Enable web search capabilities in OpenWebUI
    - Complete RAG pipeline with real-time web data
-   - Final step for comprehensive AI platform
+
+6. **📊 Observability Setup**
+   - Container Insights for EKS control plane monitoring
+   - Custom CloudWatch dashboards for ETCD and API server metrics
+   - Cost observability with uniform tagging strategy
+   - Optional KubeCost integration for Kubernetes-native cost monitoring
 
 **👉 Next Steps:**
 - **First:** [Build Custom Image](./build-custom-image/)
@@ -198,6 +204,42 @@ SearXNG enhances OpenWebUI with web search capabilities, enabling:
 - Multi-tenant ready deployment
 
 For detailed setup instructions, proceed to [setup-searxng](./setup-searxng/)
+
+## Setup Observability
+
+This project includes comprehensive observability setup that provides:
+- Container Insights for EKS control plane monitoring
+- Custom CloudWatch dashboards for ETCD and API server metrics
+- Cost observability with uniform tagging strategy
+- Optional KubeCost integration for Kubernetes-native cost monitoring
+
+The observability setup monitors crucial control plane components to prevent issues like ETCD database lockdowns that can freeze entire clusters, based on real-world production incident prevention strategies.
+
+📊 **Infrastructure Observability**
+- Enhanced Container Insights automatically enabled via Terraform
+- Control plane metrics (ETCD, API server, admission controller)
+- Worker node and application performance monitoring
+- Built-in CloudWatch dashboards for immediate visibility
+
+💰 **Cost Observability**
+- Uniform tagging strategy across all AWS resources
+- AWS Cost Explorer integration for detailed cost analysis
+- Component-level cost breakdown and tracking
+- Optional KubeCost EKS add-on for Kubernetes-native cost monitoring (free)
+
+🔍 **Key Monitoring Areas**
+- ETCD database size and performance (prevent lockdowns)
+- API server request latency and throughput
+- Admission controller performance metrics
+- Resource utilization and optimization opportunities
+
+🚨 **Proactive Monitoring**
+- Foundation for critical alerting setup
+- Historical trend analysis capabilities
+- Performance bottleneck identification
+- Capacity planning insights
+
+For detailed setup instructions and dashboard configuration, proceed to [setup-o11y](./setup-o11y/)
 
 ## Cleanup
 

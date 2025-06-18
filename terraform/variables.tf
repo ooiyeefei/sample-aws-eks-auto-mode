@@ -22,3 +22,9 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
   type        = string
 }
+
+variable "enable_kubecost" {
+  description = "Enable KubeCost EKS add-on for Kubernetes-native cost monitoring (free standard bundle)"
+  type        = bool
+  default     = false
+}
