@@ -29,6 +29,59 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "openwebui_docs" {
   }
 }
 
+# S3 Bucket Policy for VPC Endpoint and Pod Identity Security
+resource "aws_s3_bucket_policy" "openwebui_docs_policy" {
+  bucket = aws_s3_bucket.openwebui_docs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "DenyDirectInternetAccess"
+        Effect = "Deny"
+        Principal = "*"
+        Action = "s3:*"
+        Resource = [
+          aws_s3_bucket.openwebui_docs.arn,
+          "${aws_s3_bucket.openwebui_docs.arn}/*"
+        ]
+        Condition = {
+          StringNotEquals = {
+            "aws:sourceVpce" = aws_vpc_endpoint.s3.id
+          }
+        }
+      },
+      {
+        Sid    = "AllowPodIdentityAccess"
+        Effect = "Allow"
+        Principal = {
+          AWS = module.openwebui_pod_identity.iam_role_arn
+        }
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.openwebui_docs.arn,
+          "${aws_s3_bucket.openwebui_docs.arn}/*"
+        ]
+        Condition = {
+          StringEquals = {
+            "aws:sourceVpce" = aws_vpc_endpoint.s3.id
+          }
+        }
+      }
+    ]
+  })
+
+  depends_on = [
+    aws_vpc_endpoint.s3,
+    module.openwebui_pod_identity
+  ]
+}
+
 # Create IAM role for Open WebUI using the EKS Pod Identity module
 module "openwebui_pod_identity" {
   source = "terraform-aws-modules/eks-pod-identity/aws"

@@ -315,6 +315,8 @@ helm upgrade open-webui open-webui/open-webui -f values.yaml -n vllm-inference -
 
 Your AI platform is now ready for production workloads with enterprise-grade security, scalability, cost optimization, and comprehensive AI capabilities including document processing and web search.
 
+**👉 Next Step: [Setup Observability](../setup-o11y/)** - Add comprehensive monitoring and cost observability to your AI platform.
+
 ## Support
 
 For issues and questions:
@@ -324,11 +326,3 @@ For issues and questions:
 - Follow the sequential setup flow
 - Check troubleshooting steps above
 
-## Next Steps
-
-Consider these enhancements for your AI platform:
-- **Monitoring**: Set up Prometheus and Grafana for comprehensive monitoring
-- **Backup**: Implement automated backup strategies for databases
-- **CI/CD**: Set up automated deployment pipelines
-- **Custom Models**: Add additional LLM providers through LiteLLM
-- **Advanced RAG**: Implement more sophisticated RAG pipelines
