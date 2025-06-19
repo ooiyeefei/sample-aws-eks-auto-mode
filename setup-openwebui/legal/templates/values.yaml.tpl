@@ -85,7 +85,7 @@ extraEnvVars:
     value: "http://tika.${shared_namespace}.svc.cluster.local:9998"
   
 
-openaiBaseApiUrls: ["http://vllm-service/v1"]
+openaiBaseApiUrls: ["http://vllm-service.vllm-inference.svc.cluster.local/v1"]
 
 # Branding assets are now embedded in the custom image v0.0.2
 # No ConfigMap volume mounts needed

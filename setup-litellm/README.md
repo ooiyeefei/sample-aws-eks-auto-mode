@@ -147,10 +147,6 @@ To use LiteLLM as a proxy for OpenWebUI:
 ```bash
 # Get the LiteLLM master key
 MASTER_KEY=$(kubectl get secret litellm-master-salt -n litellm -o jsonpath='{.data.LITELLM_MASTER_KEY}' | base64 -d)
-
-# Get the OpenWebUI URL
-OPENWEBUI_URL=$(kubectl get service open-webui-service -n vllm-inference -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-echo "OpenWebUI settings is available at: http://$OPENWEBUI_URL/admin/settings"
 ```
 
 Go to settings --> admin settings --> Go to connections --> Create a new OpenAI API Connection

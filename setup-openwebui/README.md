@@ -116,13 +116,13 @@ kubectl apply -f shared/cluster-secret-store.yaml
 # Deploy Apache Tika for document processing (shared across all tenants)
 helm repo add tika https://apache.jfrog.io/artifactory/tika
 helm repo update
+kubectl apply -f shared/namespace.yaml
 helm install tika tika/tika -f shared/tika-values.yaml -n vllm-inference
 ```
 
 [Optional: vLLM setup]
 ```bash
 # OPTIONAL: Deploy shared vLLM inference service
-kubectl apply -f shared/namespace.yaml
 kubectl create secret generic hf-secret  -n vllm-inference --from-literal=hf_api_token=<hugging-face-token>
 kubectl apply -f ../nodepools/gpu-nodepool.yaml
 kubectl apply -f shared/llm.yaml
@@ -148,7 +148,9 @@ kubectl apply -f oauth-secret.yaml
 
 # Create the pgvector extension for this tenant's database
 kubectl apply -f pgvector-job.yaml
+```
 
+```bash
 # Check pgvector job status
 kubectl get jobs -n $NAMESPACE
 kubectl logs job/pgvector-setup -n $NAMESPACE
@@ -249,7 +251,7 @@ kubectl get secrets -n $NAMESPACE
    ```bash
    # Get your tenant's S3 bucket name
    cd ../terraform
-   terraform output | grep ${TENANT}_s3_bucket
+   terraform output | grep "webui-docs" | grep ${TENANT}
    
    # List objects in your tenant's bucket
    aws s3 ls s3://your-tenant-bucket-name/
