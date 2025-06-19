@@ -5,11 +5,11 @@ data "aws_caller_identity" "current" {}
 resource "aws_s3_bucket" "openwebui_docs" {
   for_each = var.tenants
   
-  bucket_prefix = "${var.name}-openwebui-docs-${each.value.name}-"
+  bucket_prefix = "${var.name}-webui-docs-${each.value.name}-"
   force_destroy = true
   
   tags = {
-    Name   = "${var.name}-openwebui-docs-${each.value.name}"
+    Name   = "${var.name}-webui-docs-${each.value.name}"
     Tenant = each.value.name
   }
 }
