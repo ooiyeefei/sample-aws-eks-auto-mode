@@ -9,17 +9,20 @@ provider "aws" {
   region = "us-east-1"
 }
 
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  token                  = data.aws_eks_cluster_auth.eks_auth.token
+}
+
 provider "helm" {
   kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-    exec = {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      # This requires the awscli to be installed locally where Terraform is executed
-      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-    }
+    
+    # Use the token generated natively by the aws_eks_cluster_auth data source.
+    # This is the key to removing the dependency on the AWS CLI.
+    token = data.aws_eks_cluster_auth.eks_auth.token
   }
 }
 
@@ -29,6 +32,10 @@ provider "helm" {
 
 data "aws_ecrpublic_authorization_token" "token" {
   provider = aws.ecr
+}
+
+data "aws_eks_cluster_auth" "eks_auth" {
+  name = module.eks.cluster_name
 }
 
 #https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones
