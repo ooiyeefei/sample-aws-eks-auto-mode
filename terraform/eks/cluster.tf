@@ -17,9 +17,166 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  cluster_compute_config = {
-    enabled    = true
-    node_pools = ["general-purpose"]
+  # Add managed node groups
+  eks_managed_node_groups = {
+    # General purpose node group for basic workloads
+    general = {
+      name = "general"
+
+      subnet_ids = module.vpc.private_subnets
+
+      min_size     = 1
+      max_size     = 5
+      desired_size = 2
+
+      instance_types = ["t3.medium", "t3.large"]
+      capacity_type  = "ON_DEMAND"
+
+      # Enable detailed monitoring
+      enable_monitoring = true
+
+      # Disk configuration
+      disk_size = 20
+      disk_type = "gp3"
+
+      # Labels and taints
+      labels = {
+        Environment = var.name
+        NodeGroup   = "general"
+      }
+
+      # Tags
+      tags = {
+        ExtraTag = "general-node-group"
+      }
+    }
+
+    # GPU node group for ML workloads
+    gpu = {
+      name = "gpu"
+
+      subnet_ids = module.vpc.private_subnets
+
+      min_size     = 0
+      max_size     = 3
+      desired_size = 0  # Start with 0, scale up as needed
+
+      instance_types = ["g5.xlarge", "g5.2xlarge", "g5.4xlarge"]
+      capacity_type  = "ON_DEMAND"
+
+      # Enable detailed monitoring
+      enable_monitoring = true
+
+      # Disk configuration
+      disk_size = 50
+      disk_type = "gp3"
+
+      # Labels and taints for GPU workloads
+      labels = {
+        Environment = var.name
+        NodeGroup   = "gpu"
+        accelerator = "nvidia"
+      }
+
+      taints = [{
+        key    = "nvidia.com/gpu"
+        value  = "true"
+        effect = "NO_SCHEDULE"
+      }]
+
+      # Tags
+      tags = {
+        ExtraTag = "gpu-node-group"
+      }
+    }
+
+    # Spot node group for cost optimization
+    spot = {
+      name = "spot"
+
+      subnet_ids = module.vpc.private_subnets
+
+      min_size     = 0
+      max_size     = 5
+      desired_size = 0  # Start with 0, scale up as needed
+
+      instance_types = ["t3.medium", "t3.large", "c6i.large", "m6i.large"]
+      capacity_type  = "SPOT"
+
+      # Enable detailed monitoring
+      enable_monitoring = true
+
+      # Disk configuration
+      disk_size = 20
+      disk_type = "gp3"
+
+      # Labels and taints for spot instances
+      labels = {
+        Environment = var.name
+        NodeGroup   = "spot"
+      }
+
+      taints = [{
+        key    = "spot"
+        value  = "true"
+        effect = "NO_SCHEDULE"
+      }]
+
+      # Tags
+      tags = {
+        ExtraTag = "spot-node-group"
+      }
+    }
   }
+
+  # Cluster add-ons
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      most_recent = true
+    }
+    aws-ebs-csi-driver = {
+      most_recent = true
+    }
+  }
+
+  # Cluster security group
+  cluster_security_group_additional_rules = {
+    ingress_nodes_443 = {
+      description                = "Node groups to cluster API"
+      protocol                  = "tcp"
+      from_port                 = 443
+      to_port                   = 443
+      type                      = "ingress"
+      source_node_security_group = true
+    }
+  }
+
+  # Node security group
+  node_security_group_additional_rules = {
+    ingress_self_all = {
+      description = "Node to node all ports/protocols"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      self        = true
+    }
+    egress_all = {
+      description      = "Node all egress"
+      protocol         = "-1"
+      from_port        = 0
+      to_port          = 0
+      type             = "egress"
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+    }
+  }
+
   tags = local.tags
 } 

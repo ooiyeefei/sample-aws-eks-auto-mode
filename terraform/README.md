@@ -7,7 +7,7 @@ This directory contains the Terraform configuration for the AWS infrastructure, 
 The infrastructure consists of the following AWS services:
 
 ### Core Infrastructure
-- **EKS (Elastic Kubernetes Service)** - Main Kubernetes cluster
+- **EKS (Elastic Kubernetes Service)** - Main Kubernetes cluster with managed node groups
 - **VPC** - Virtual Private Cloud with public/private subnets
 - **NAT Gateway** - For private subnet internet access
 - **IAM** - Various roles and policies for EKS, RDS, S3, Secrets Manager
@@ -31,6 +31,33 @@ The infrastructure consists of the following AWS services:
 - **CloudWatch** - Logging and monitoring
 - **Security Groups** - Network security for various services
 
+## EKS Node Groups
+
+The EKS cluster is configured with three managed node groups:
+
+### 1. General Purpose Node Group
+- **Instance Types**: t3.medium, t3.large
+- **Capacity Type**: ON_DEMAND
+- **Min/Max Size**: 1/5 nodes
+- **Desired Size**: 2 nodes
+- **Use Case**: General workloads, system pods
+
+### 2. GPU Node Group
+- **Instance Types**: g5.xlarge, g5.2xlarge, g5.4xlarge
+- **Capacity Type**: ON_DEMAND
+- **Min/Max Size**: 0/3 nodes
+- **Desired Size**: 0 nodes (scale up as needed)
+- **Use Case**: ML/AI workloads requiring GPUs
+- **Taints**: nvidia.com/gpu=true:NoSchedule
+
+### 3. Spot Node Group
+- **Instance Types**: t3.medium, t3.large, c6i.large, m6i.large
+- **Capacity Type**: SPOT
+- **Min/Max Size**: 0/5 nodes
+- **Desired Size**: 0 nodes (scale up as needed)
+- **Use Case**: Cost-optimized workloads
+- **Taints**: spot=true:NoSchedule
+
 ## Directory Structure
 
 ```
@@ -39,10 +66,12 @@ terraform/
 ├── variables.tf            # Root module variables
 ├── outputs.tf              # Root module outputs
 ├── versions.tf             # Provider versions
+├── templates/              # Template files
+│   └── node-groups-info.md.tpl
 ├── eks/                    # EKS and VPC infrastructure
 │   ├── main.tf            # Provider configuration and data sources
 │   ├── vpc.tf             # VPC, subnets, NAT Gateway
-│   ├── cluster.tf         # EKS cluster configuration
+│   ├── cluster.tf         # EKS cluster configuration with node groups
 │   ├── variables.tf       # EKS module variables
 │   ├── outputs.tf         # EKS module outputs
 │   └── versions.tf        # EKS module provider versions
@@ -73,7 +102,7 @@ terraform/
 
 The modules have the following dependencies:
 
-1. **EKS** - No dependencies (creates VPC and cluster)
+1. **EKS** - No dependencies (creates VPC and cluster with node groups)
 2. **S3** - Depends on EKS (for cluster name)
 3. **RDS** - Depends on EKS (for VPC and subnets)
 4. **Redis** - Depends on EKS (for VPC and security groups)
@@ -128,6 +157,48 @@ After deployment, you can view the outputs:
 terraform output
 ```
 
+## Node Group Management
+
+### Scaling Node Groups
+
+```bash
+# Scale general node group
+aws eks update-nodegroup-config \
+  --cluster-name <cluster-name> \
+  --nodegroup-name general \
+  --scaling-config minSize=2,maxSize=10,desiredSize=5
+
+# Scale GPU node group
+aws eks update-nodegroup-config \
+  --cluster-name <cluster-name> \
+  --nodegroup-name gpu \
+  --scaling-config minSize=1,maxSize=5,desiredSize=2
+```
+
+### Deploying to Specific Node Groups
+
+```yaml
+# Deploy to GPU nodes
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-app
+spec:
+  containers:
+  - name: gpu-app
+    image: nvidia/cuda:11.0-base
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+  tolerations:
+  - key: nvidia.com/gpu
+    operator: Equal
+    value: "true"
+    effect: NoSchedule
+  nodeSelector:
+    NodeGroup: gpu
+```
+
 ## Security Considerations
 
 - All databases are encrypted at rest
@@ -135,6 +206,7 @@ terraform output
 - Security groups restrict access to necessary ports only
 - IAM roles follow the principle of least privilege
 - Secrets Manager is used for sensitive data storage
+- Node groups use appropriate taints and labels for workload isolation
 
 ## Maintenance
 
@@ -168,6 +240,16 @@ To destroy individual modules:
 cd rds
 terraform destroy
 ```
+
+## Migration from Automode
+
+This configuration has been migrated from EKS automode to traditional managed node groups. Key changes:
+
+- Removed Karpenter automode configuration
+- Added three managed node groups (general, gpu, spot)
+- Removed automode-specific subnet tags
+- Added proper node group labels and taints
+- Maintained all existing functionality with better control
 
 ## Notes
 

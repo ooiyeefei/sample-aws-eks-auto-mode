@@ -115,45 +115,7 @@ module "redis" {
   depends_on = [module.eks]
 }
 
-# Setup and template generation
-resource "null_resource" "create_nodepools_dir" {
-  provisioner "local-exec" {
-    command = "mkdir -p ${path.module}/../nodepools"
-  }
-}
-
-resource "local_file" "setup_graviton" {
-  content = templatefile("${path.module}/../nodepool-templates/graviton-nodepool.yaml.tpl", {
-    node_iam_role_name  = module.eks.node_iam_role_name
-    cluster_name = module.eks.cluster_name
-  })
-  filename = "${path.module}/../nodepools/graviton-nodepool.yaml"
-}
-
-resource "local_file" "setup_spot" {
-  content = templatefile("${path.module}/../nodepool-templates/spot-nodepool.yaml.tpl", {
-    node_iam_role_name  = module.eks.node_iam_role_name
-    cluster_name = module.eks.cluster_name
-  })
-  filename = "${path.module}/../nodepools/spot-nodepool.yaml"
-}
-
-resource "local_file" "setup_gpu" {
-  content = templatefile("${path.module}/../nodepool-templates/gpu-nodepool.yaml.tpl", {
-    node_iam_role_name  = module.eks.node_iam_role_name
-    cluster_name = module.eks.cluster_name
-  })
-  filename = "${path.module}/../nodepools/gpu-nodepool.yaml"
-}
-
-resource "local_file" "setup_neuron" {
-  content = templatefile("${path.module}/../nodepool-templates/neuron-nodepool.yaml.tpl", {
-    node_iam_role_name  = module.eks.node_iam_role_name
-    cluster_name = module.eks.cluster_name
-  })
-  filename = "${path.module}/../nodepools/neuron-nodepool.yaml"
-}
-
+# Setup and template generation for OpenWebUI
 resource "local_file" "setup_openwebui_values" {
   content = templatefile("${path.module}/../setup-openwebui/templates/values.yaml.tpl", {
     s3_bucket_name = module.s3.openwebui_s3_bucket
@@ -207,4 +169,14 @@ resource "local_file" "setup_litellm_secret" {
     litellm_api_keys_secret_name = module.secrets.litellm_api_keys_secret_arn
   })
   filename = "${path.module}/../setup-litellm/secret.yaml"
+}
+
+# Create a node group information file for reference
+resource "local_file" "node_groups_info" {
+  content = templatefile("${path.module}/templates/node-groups-info.md.tpl", {
+    cluster_name = module.eks.cluster_name
+    region = var.region
+    node_groups = module.eks.node_groups
+  })
+  filename = "${path.module}/../node-groups-info.md"
 }

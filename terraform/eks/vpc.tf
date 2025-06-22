@@ -12,14 +12,23 @@ module "vpc" {
   enable_nat_gateway = true
   single_nat_gateway = true
 
+  # Enable DNS hostnames and DNS resolution
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+
+  # EKS required tags
   public_subnet_tags = {
     "kubernetes.io/role/elb" = 1
   }
 
   private_subnet_tags = {
     "kubernetes.io/role/internal-elb" = 1
-    "karpenter.sh/discovery" = "automode-demo"
+    # Remove Karpenter automode tags
+    # "karpenter.sh/discovery" = "automode-demo"
   }
 
-  tags = local.tags
+  # Additional tags for better resource management
+  tags = merge(local.tags, {
+    "kubernetes.io/cluster/${var.name}" = "shared"
+  })
 } 
