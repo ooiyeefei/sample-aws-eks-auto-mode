@@ -199,14 +199,4 @@ resource "aws_secretsmanager_secret_version" "db_connection_string_version" {
   })
   
   depends_on = [aws_db_instance.postgres]
-}
-
-# DB Subnet Group for LiteLLM
-resource "aws_db_subnet_group" "litellm_db_subnet_group" {
-  name       = "${var.name}-litellm-db-subnet-group"
-  subnet_ids = local.private_subnets
-
-  tags = {
-    Name = "${var.name}-litellm-db-subnet-group"
-  }
 } 
