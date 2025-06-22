@@ -3,6 +3,11 @@ variable "name" {
   type        = string
 }
 
+variable "region" {
+  description = "The AWS region for the provider."
+  type        = string
+}
+
 variable "vpc_id" {
   description = "VPC ID where RDS instances will be created. This should be wired from the EKS module's output."
   type        = string
@@ -13,7 +18,8 @@ variable "vpc_cidr" {
   type        = string
 }
 
-variable "private_subnets" {
-  description = "List of private subnet IDs for the RDS subnet group. This should be wired from the EKS module's output."
-  type        = list(string)
+variable "private_subnets_json" {
+  description = "A JSON-encoded string of private subnet IDs. This should be wired from the EKS module's output using the jsonencode() function."
+  type        = string
+  default     = ""
 } 
