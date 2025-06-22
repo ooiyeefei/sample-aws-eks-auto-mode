@@ -58,7 +58,7 @@ module "openwebui_pod_identity" {
     openwebui = {
       service_account      = "open-webui-pia"
       namespace            = "vllm-inference"
-      cluster_name         = var.cluster_name
+      cluster_name         = trim(var.cluster_name)
     }
   }
 
