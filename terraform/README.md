@@ -1,35 +1,65 @@
-# Terraform Infrastructure as Code
+# Terraform Infrastructure as Code for Rafay Environment Templates
 
-This directory contains the Terraform configuration for the AWS infrastructure, organized into modular components for better maintainability and separation of concerns.
+This directory contains the Terraform configuration for an AWS infrastructure, organized into decoupled, composable modules. This structure is specifically designed to be used with a platform engineering approach, such as **Rafay's Environment Templates**, where each folder represents an independent "lego block" or **Resource Template**.
 
-## Architecture Overview
+## Rafay Platform Engineering Model
 
-The infrastructure consists of the following AWS services:
+This repository follows a composable infrastructure model:
+- **Resource Templates**: Each folder (`/eks`, `/rds`, `/s3`, `/apps`, etc.) is a standalone Terraform module intended to be a Rafay Resource Template.
+- **Environment Templates**: A Rafay Environment Template defines which Resource Templates to deploy and orchestrates the dependencies between them.
+- **Inputs & Outputs**: Rafay connects the templates by passing the outputs from one resource (e.g., VPC ID from the `eks` template) as inputs to another (e.g., the `rds` template).
+- **Decoupling**: The modules themselves are fully decoupled. There are no hardcoded cross-module dependencies. For example, the `rds` module does not depend on the `s3` module. The connection is made by a dedicated `apps` module.
 
-### Core Infrastructure
-- **EKS (Elastic Kubernetes Service)** - Main Kubernetes cluster with managed node groups
-- **VPC** - Virtual Private Cloud with public/private subnets
-- **NAT Gateway** - For private subnet internet access
-- **IAM** - Various roles and policies for EKS, RDS, S3, Secrets Manager
+## Architecture Overview & Modules
 
-### Database Services
-- **RDS PostgreSQL** - Two instances:
-  - Main PostgreSQL for OpenWebUI (vectordb)
-  - LiteLLM PostgreSQL for LLM proxy
-- **ElastiCache Redis** - For LiteLLM caching
+The infrastructure consists of the following modular components:
 
-### Storage & Secrets
-- **S3** - Document storage for OpenWebUI
-- **Secrets Manager** - Multiple secrets for:
-  - PostgreSQL credentials
-  - LiteLLM master/salt keys
-  - API keys
-  - Database connection strings
+- **`eks/`**: Deploys the foundational **EKS Cluster** and **VPC**. It outputs the network details and cluster identity information required by other modules.
+- **`rds/`**: Deploys **RDS PostgreSQL** instances for application data and an optional LiteLLM proxy. It outputs database endpoints and the ARN of a secret access policy.
+- **`s3/`**: Deploys an **S3 Bucket** for document storage and creates an **EKS Pod Identity IAM Role** for the OpenWebUI application.
+- **`redis/`**: Deploys an **ElastiCache Redis** cluster for caching.
+- **`secrets/`**: Manages **Secrets Manager** resources and deploys the **External Secrets Operator** to the cluster.
+- **`apps/`**: A special "glue" module. It contains resources that connect other modules, such as the **IAM policy attachment** that grants the application role (from `s3`) permission to access secrets (from `rds`).
 
-### Additional Services
-- **ECR Public** - Container registry access
-- **CloudWatch** - Logging and monitoring
-- **Security Groups** - Network security for various services
+### Example Composition in Rafay
+
+An Environment Template in Rafay would be configured with the following dependencies:
+
+1.  `eks` (No dependencies)
+2.  `s3` (Depends on `eks`)
+3.  `rds` (Depends on `eks`)
+4.  `redis` (Depends on `eks`)
+5.  `secrets` (Depends on `eks`, `rds`)
+6.  `apps` (Depends on `rds`, `s3`)
+
+This ensures that networking and IAM roles are available before the resources that need them are created.
+
+## Directory Structure
+
+```
+terraform/
+├── main.tf                 # EXAMPLE root module showing how to compose the modules
+├── README.md               # This documentation
+├── eks/                    # EKS + VPC Resource Template
+├── rds/                    # RDS Resource Template
+├── s3/                     # S3 Resource Template
+├── redis/                  # Redis Resource Template
+├── secrets/                # Secrets Resource Template
+└── apps/                   # App Integration/Glue Resource Template
+```
+
+## How Communication is Enabled
+
+You asked specifically how the cluster can talk to RDS/S3 with this decoupled approach. This is achieved by passing outputs as inputs, orchestrated by the platform (Rafay):
+
+1.  **Network**: The `eks` module creates the VPC and subnets. It **outputs** `vpc_id` and `private_subnet_ids`.
+2.  The `rds` module takes `vpc_id` and `private_subnet_ids` as **input variables** to deploy the database into the correct network. It creates a security group allowing traffic from the VPC's CIDR range.
+3.  **Permissions**:
+    - The `rds` module creates an IAM policy to access its secrets and **outputs** the `policy_arn`.
+    - The `s3` module creates the application's IAM role and **outputs** the `role_name`.
+    - The `apps` module takes the `policy_arn` and `role_name` as **input variables** and creates the `aws_iam_role_policy_attachment` to link them.
+
+This model ensures that if you have a use case that doesn't need S3, you simply don't include the `s3` or `apps` resource templates in your Rafay Environment Template. The `eks` and `rds` modules will still deploy successfully without any failures due to missing dependencies.
 
 ## EKS Node Groups
 
@@ -57,46 +87,6 @@ The EKS cluster is configured with three managed node groups:
 - **Desired Size**: 0 nodes (scale up as needed)
 - **Use Case**: Cost-optimized workloads
 - **Taints**: spot=true:NoSchedule
-
-## Directory Structure
-
-```
-terraform/
-├── main.tf                 # Root module orchestrating all components
-├── variables.tf            # Root module variables
-├── outputs.tf              # Root module outputs
-├── versions.tf             # Provider versions
-├── templates/              # Template files
-│   └── node-groups-info.md.tpl
-├── eks/                    # EKS and VPC infrastructure
-│   ├── main.tf            # Provider configuration and data sources
-│   ├── vpc.tf             # VPC, subnets, NAT Gateway
-│   ├── cluster.tf         # EKS cluster configuration with node groups
-│   ├── variables.tf       # EKS module variables
-│   ├── outputs.tf         # EKS module outputs
-│   └── versions.tf        # EKS module provider versions
-├── rds/                    # Database infrastructure
-│   ├── main.tf            # Main PostgreSQL instance
-│   ├── litellm-rds.tf     # LiteLLM PostgreSQL instance
-│   ├── variables.tf       # RDS module variables
-│   ├── outputs.tf         # RDS module outputs
-│   └── versions.tf        # RDS module provider versions
-├── s3/                     # S3 storage infrastructure
-│   ├── main.tf            # S3 bucket and Pod Identity
-│   ├── variables.tf       # S3 module variables
-│   ├── outputs.tf         # S3 module outputs
-│   └── versions.tf        # S3 module provider versions
-├── secrets/                # Secrets Manager infrastructure
-│   ├── main.tf            # Secrets and External Secrets Operator
-│   ├── variables.tf       # Secrets module variables
-│   ├── outputs.tf         # Secrets module outputs
-│   └── versions.tf        # Secrets module provider versions
-└── redis/                  # Redis cache infrastructure
-    ├── main.tf            # ElastiCache Redis cluster
-    ├── variables.tf       # Redis module variables
-    ├── outputs.tf         # Redis module outputs
-    └── versions.tf        # Redis module provider versions
-```
 
 ## Module Dependencies
 

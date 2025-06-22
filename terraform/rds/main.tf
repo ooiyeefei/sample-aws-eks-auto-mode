@@ -7,9 +7,9 @@ resource "random_password" "postgres" {
 
 # Create AWS Secrets Manager secret for PostgreSQL credentials
 resource "aws_secretsmanager_secret" "postgres_credentials" {
-  name_prefix = "${var.name}-postgres-credentials-"  # Changed from fixed name to prefix for uniqueness
+  name_prefix = "${var.name}-postgres-credentials-"
   description = "PostgreSQL credentials for OpenWebUI"
-  recovery_window_in_days = 0  # Added to allow immediate deletion
+  recovery_window_in_days = 0
   
   tags = {
     Name = "${var.name}-postgres-credentials"
@@ -79,7 +79,6 @@ resource "aws_db_parameter_group" "postgres_vector" {
     value = "pg_stat_statements"
   }
   
-  # Added enhanced logging parameters
   parameter {
     name  = "log_statement"
     value = "all"
@@ -144,11 +143,9 @@ resource "aws_db_instance" "postgres" {
   backup_window           = "03:00-04:00"
   maintenance_window      = "Mon:04:00-Mon:05:00"
   
-  # Changed to match second setup for clean destruction
   skip_final_snapshot     = true
   deletion_protection     = false
   
-  # Added enhanced monitoring and performance insights
   performance_insights_enabled = true
   enabled_cloudwatch_logs_exports = ["postgresql"]
   monitoring_interval = 60
@@ -181,10 +178,14 @@ resource "aws_iam_policy" "secrets_access" {
   })
 }
 
+# NOTE: The policy attachment that links this policy to an IAM role
+# has been moved to the `apps` module to decouple RDS from other services.
+# This module now only creates the policy and outputs its ARN.
+
 # Create a separate connection string secret for easier management and rotation
 resource "aws_secretsmanager_secret" "db_connection_string" {
   name_prefix = "${var.name}-db-connection-"
-  recovery_window_in_days = 0  # Allow immediate deletion
+  recovery_window_in_days = 0
   
   tags = {
     Name = "${var.name}-db-connection"

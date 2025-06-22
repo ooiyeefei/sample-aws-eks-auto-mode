@@ -115,6 +115,17 @@ module "redis" {
   depends_on = [module.eks]
 }
 
+# Apps Module (for connecting other modules)
+module "apps" {
+  source = "./apps"
+
+  # Connects RDS secrets to the S3/OpenWebUI Pod Identity Role
+  openwebui_pod_identity_role_name = module.s3.openwebui_pod_identity_role_name
+  secrets_access_policy_arn        = module.rds.secrets_access_policy_arn
+
+  depends_on = [module.rds, module.s3]
+}
+
 # Setup and template generation for OpenWebUI
 resource "local_file" "setup_openwebui_values" {
   content = templatefile("${path.module}/../setup-openwebui/templates/values.yaml.tpl", {
