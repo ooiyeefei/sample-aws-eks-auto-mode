@@ -6,4 +6,9 @@ variable "name" {
 variable "cluster_name" {
   description = "EKS cluster name for Pod Identity association"
   type        = string
+}
+
+variable "region" {
+  description = "The AWS region for the provider."
+  type        = string
 } 
