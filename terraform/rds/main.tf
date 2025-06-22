@@ -61,7 +61,7 @@ resource "aws_security_group" "rds" {
 # DB Subnet Group
 resource "aws_db_subnet_group" "rds" {
   name       = "${var.name}-rds-subnet-group"
-  subnet_ids = local.private_subnets
+  subnet_ids = var.private_subnets
 
   tags = {
     Name = "${var.name}-rds-subnet-group"
