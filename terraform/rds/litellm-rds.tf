@@ -151,7 +151,7 @@ resource "aws_db_instance" "litellm_postgres" {
 # DB Subnet Group for LiteLLM
 resource "aws_db_subnet_group" "litellm_db_subnet_group" {
   name       = "${var.name}-litellm-db-subnet-group"
-  subnet_ids = local.private_subnets
+  subnet_ids = var.private_subnets
 
   tags = {
     Name = "${var.name}-litellm-db-subnet-group"
