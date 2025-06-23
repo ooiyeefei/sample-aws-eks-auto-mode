@@ -12,4 +12,9 @@ variable "secret_arns" {
   description = "List of Secrets Manager ARNs that External Secrets can access"
   type        = list(string)
   default     = []
+}
+
+variable "region" {
+  description = "The AWS region for the provider."
+  type        = string
 } 
