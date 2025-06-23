@@ -143,6 +143,9 @@ module "eks" {
     aws-ebs-csi-driver = {
       most_recent = true
     }
+    eks-pod-identity-agent = {
+      most_recent = true
+    }
   }
 
   # Cluster security group
