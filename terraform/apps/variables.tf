@@ -6,4 +6,9 @@ variable "openwebui_pod_identity_role_name" {
 variable "secrets_access_policy_arn" {
   description = "The ARN of the IAM policy that grants access to RDS secrets, created in the RDS module."
   type        = string
+}
+
+variable "region" {
+  description = "The AWS region for the provider."
+  type        = string
 } 
