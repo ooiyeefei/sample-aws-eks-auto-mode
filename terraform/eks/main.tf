@@ -40,6 +40,10 @@ data "aws_availability_zones" "available" {
   }
 }
 
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.cluster_name
+}
+
 locals {
   # Number of AZs we wish to create
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)

@@ -61,4 +61,10 @@ output "cluster_oidc_issuer_url" {
 output "cluster_certificate_authority_data" {
   description = "Base64 encoded certificate data required to communicate with the cluster"
   value       = module.eks.cluster_certificate_authority_data
+}
+
+output "kube_token" {
+  description = "Short-lived token for authenticating to the EKS cluster"
+  value       = data.aws_eks_cluster_auth.this.token
+  sensitive   = true
 } 
