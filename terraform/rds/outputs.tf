@@ -38,4 +38,14 @@ output "litellm_db_connection_string_arn" {
 output "secrets_access_policy_arn" {
   description = "The ARN of the IAM policy for Secrets Manager access"
   value       = aws_iam_policy.secrets_access.arn
+}
+
+output "secret_arns" {
+  description = "List of all secret ARNs created by this module."
+  value = [
+    aws_secretsmanager_secret.postgres_credentials.arn,
+    aws_secretsmanager_secret.db_connection_string.arn,
+    aws_secretsmanager_secret.litellm_db_credentials.arn,
+    aws_secretsmanager_secret.litellm_db_connection_string.arn
+  ]
 } 
