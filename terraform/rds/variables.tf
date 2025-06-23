@@ -25,6 +25,6 @@ variable "vpc_cidr" {
 
 variable "private_subnets" {
   description = "Private subnet IDs. This should be wired from the EKS module's output using the jsonencode() function."
-  type        = string
+  type        = list(string)
   default     = ""
 }
