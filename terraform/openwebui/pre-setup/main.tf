@@ -18,20 +18,19 @@ resource "rafay_workload" "openwebui_pre_setup" {
       type = "Yaml"
       artifact {
         paths {
-          name = "namespace.yaml"
+          name = "terraform/openwebui/pre-setup/namespace.yaml"
         }
         paths {
-          name = "pgvector-job.yaml"
+          name = "terraform/openwebui/pre-setup/pgvector-job.yaml"
         }
         paths {
-          name = "cluster-secret-store.yaml"
+          name = "terraform/openwebui/pre-setup/cluster-secret-store.yaml"
         }
         paths {
-          name = "external-secret.yaml"
+          name = "terraform/openwebui/pre-setup/external-secret.yaml"
         }
-        # If using a git repo, add repository and revision here
-        # repository = var.repo_name
-        # revision   = var.repo_branch
+        repository = var.openwebui_repo
+        revision   = var.openwebui_repo_branch
       }
     }
   }
