@@ -48,4 +48,9 @@ output "secret_arns" {
     aws_secretsmanager_secret.litellm_db_credentials.arn,
     aws_secretsmanager_secret.litellm_db_connection_string.arn
   ]
+}
+
+output "postgres_secret_name" {
+  description = "The name of the AWS Secrets Manager secret for Postgres credentials"
+  value       = aws_secretsmanager_secret.postgres_credentials.name
 } 

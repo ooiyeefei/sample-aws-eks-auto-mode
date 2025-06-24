@@ -1,5 +1,3 @@
-variable "project_id" {}
-variable "cluster_id" {}
 variable "namespace" {}
 variable "aws_region" {}
 variable "db_secret_name" {}
@@ -17,8 +15,6 @@ locals {
 
 resource "rafay_workload" "openwebui_pre_setup" {
   name        = "openwebui-pre-setup"
-  project_id  = var.project_id
-  cluster_id  = var.cluster_id
   namespace   = var.namespace
   type        = "K8sYaml"
   yaml_paths  = [
