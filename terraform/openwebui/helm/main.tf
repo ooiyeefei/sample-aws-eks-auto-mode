@@ -1,14 +1,8 @@
 variable "namespace" {}
 variable "cluster_name" {}
-variable "chart_path" {}
 variable "openwebui_repo" {}
-variable "openwebui_repo_branch" {}
-
-locals {
-  values_yaml = templatefile("${path.module}/values.yaml.tpl", {
-    namespace = var.namespace
-  })
-}
+variable "openwebui_chart_name" {}
+variable "openwebui_chart_version" {}
 
 resource "rafay_workload" "openwebui_helm" {
   metadata {
@@ -24,13 +18,17 @@ resource "rafay_workload" "openwebui_helm" {
     artifact {
       type = "Helm"
       artifact {
-        chart_path {
-          name = var.chart_path
+        values_paths {
+          name = "values.yaml"
         }
-        repository = var.openwebui_repo
-        revision   = var.openwebui_repo_branch
+        repository   = var.openwebui_repo
+        chart_name   = var.openwebui_chart_name
+        chart_version = var.openwebui_chart_version
+        # If you want to use a custom values.yaml, add:
+        # values_paths {
+        #   name = "file://path/to/your/values.yaml"
+        # }
       }
-      values_yaml = local.values_yaml
     }
   }
 } 

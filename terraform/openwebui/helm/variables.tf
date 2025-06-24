@@ -19,7 +19,12 @@ variable "openwebui_repo" {
   type        = string
 }
 
-variable "openwebui_repo_branch" {
-  description = "Git branch or revision for the Helm chart"
+variable "openwebui_chart_name" {
+  description = "Helm chart name"
+  type        = string
+} 
+
+variable "openwebui_chart_version" {
+  description = "Helm chart version"
   type        = string
 } 
