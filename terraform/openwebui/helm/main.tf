@@ -1,21 +1,36 @@
-variable "project_id" {}
-variable "cluster_id" {}
 variable "namespace" {}
+variable "cluster_name" {}
+variable "chart_path" {}
+variable "openwebui_repo" {}
+variable "openwebui_repo_branch" {}
 
 locals {
-  values_yaml = file("${path.module}/values.yaml.tpl")
+  values_yaml = templatefile("${path.module}/values.yaml.tpl", {
+    namespace = var.namespace
+  })
 }
 
 resource "rafay_workload" "openwebui_helm" {
-  name        = "openwebui"
-  project_id  = var.project_id
-  cluster_id  = var.cluster_id
-  namespace   = var.namespace
-  type        = "Helm"
-  helm {
-    chart_name    = "open-webui"
-    chart_version = "latest"
-    repo_url      = "https://helm.openwebui.com/"
-    values_yaml   = local.values_yaml
+  metadata {
+    name    = "openwebui"
+    project = "terraform"
+  }
+  spec {
+    namespace = var.namespace
+    placement {
+      selector = "rafay.dev/clusterName=${var.cluster_name}"
+    }
+    version = "v0"
+    artifact {
+      type = "Helm"
+      artifact {
+        chart_path {
+          name = var.chart_path
+        }
+        repository = var.openwebui_repo
+        revision   = var.openwebui_repo_branch
+      }
+      values_yaml = local.values_yaml
+    }
   }
 } 

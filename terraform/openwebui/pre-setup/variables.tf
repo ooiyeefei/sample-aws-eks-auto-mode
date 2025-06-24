@@ -12,4 +12,9 @@ variable "aws_region" {
 variable "db_secret_name" {
   description = "Name of the secret in AWS Secrets Manager for DB credentials"
   type        = string
+}
+
+variable "cluster_name" {
+  description = "Name of the Rafay/EKS cluster to deploy to"
+  type        = string
 } 
