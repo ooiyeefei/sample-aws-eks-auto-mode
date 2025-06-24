@@ -9,11 +9,6 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "chart_path" {
-  description = "Relative path to the Helm chart tgz file"
-  type        = string
-}
-
 variable "openwebui_repo" {
   description = "Git repository name for the Helm chart"
   type        = string
