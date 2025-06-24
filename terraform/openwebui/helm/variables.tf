@@ -9,7 +9,7 @@ variable "cluster_name" {
   type        = string
 }
 
-variable "openwebui_repo" {
+variable "openwebui_helm_repo" {
   description = "Git repository name for the Helm chart"
   type        = string
 }

@@ -19,12 +19,12 @@ variable "cluster_name" {
   type        = string
 } 
 
-variable "openwebui_repo" {
-  description = "Git repository name for the Helm chart"
+variable "openwebui_presetup_repo" {
+  description = "Git repository name for the yaml"
   type        = string
 }
 
-variable "openwebui_repo_branch" {
-  description = "Git branch or revision for the Helm chart"
+variable "openwebui_presetup_repo_branch" {
+  description = "Git branch for the yaml"
   type        = string
 } 
