@@ -10,7 +10,7 @@ terraform {
 resource "rafay_workload" "openwebui_pre_setup" {
   metadata {
     name    = "openwebui-pre-setup"
-    project = "terraform"
+    project = var.project_name
   }
   spec {
     namespace = var.namespace

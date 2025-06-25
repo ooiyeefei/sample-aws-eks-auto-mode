@@ -4,6 +4,11 @@ variable "namespace" {
   default     = "vllm-inference"
 }
 
+variable "project_name" {
+  description = "Rafay project name"
+  type        = string
+}
+
 variable "aws_region" {
   description = "AWS region for Secrets Manager"
   type        = string
