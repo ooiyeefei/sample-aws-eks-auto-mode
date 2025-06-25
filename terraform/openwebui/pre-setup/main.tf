@@ -7,6 +7,29 @@ terraform {
   }
 }
 
+resource "rafay_workload" "external_secrets_operator" {
+  metadata {
+    name    = "external-secrets-operator"
+    project = var.project_name
+  }
+  spec {
+    namespace = "external-secrets"
+    placement {
+      selector = "rafay.dev/clusterName=${var.cluster_name}"
+    }
+    version = "v0"
+    artifact {
+      type = "Helm"
+      artifact {
+        repository    = "https://charts.external-secrets.io"
+        chart_name    = "external-secrets"
+        chart_version = "latest" # or latest stable
+        # values_paths can be added if you want to customize values
+      }
+    }
+  }
+} 
+
 resource "local_file" "namespace" {
   content  = templatefile("${path.module}/namespace.yaml.tpl", {
     namespace = var.namespace
@@ -66,4 +89,5 @@ resource "rafay_workload" "openwebui_pre_setup" {
       type = "Yaml"
     }
   }
-} 
+}
+
