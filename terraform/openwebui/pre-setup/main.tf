@@ -19,23 +19,30 @@ resource "rafay_workload" "openwebui_pre_setup" {
     }
     version = "v0"
     artifact {
-      type = "Yaml"
-      artifact {
-        paths {
-          name = "terraform/openwebui/pre-setup/namespace.yaml"
-        }
-        paths {
-          name = "terraform/openwebui/pre-setup/pgvector-job.yaml"
-        }
-        paths {
-          name = "terraform/openwebui/pre-setup/cluster-secret-store.yaml"
-        }
-        paths {
-          name = "terraform/openwebui/pre-setup/external-secret.yaml"
-        }
-        repository = var.openwebui_presetup_repo
-        revision   = var.openwebui_presetup_repo_branch
-      }
+      type    = "Yaml"
+      content = templatefile("${path.module}/namespace.yaml.tpl", {
+        namespace = var.namespace
+      })
+    }
+    artifact {
+      type    = "Yaml"
+      content = templatefile("${path.module}/pgvector-job.yaml.tpl", {
+        namespace = var.namespace
+      })
+    }
+    artifact {
+      type    = "Yaml"
+      content = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
+        namespace  = var.namespace
+        aws_region = var.aws_region
+      })
+    }
+    artifact {
+      type    = "Yaml"
+      content = templatefile("${path.module}/external-secret.yaml.tpl", {
+        namespace      = var.namespace
+        db_secret_name = var.db_secret_name
+      })
     }
   }
 } 
