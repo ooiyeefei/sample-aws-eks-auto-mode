@@ -4,6 +4,11 @@ variable "namespace" {
   default     = "vllm-inference"
 }
 
+variable "project_name" {
+  description = "Rafay project name"
+  type        = string
+}
+
 variable "cluster_name" {
   description = "Name of the Rafay/EKS cluster to deploy to"
   type        = string
