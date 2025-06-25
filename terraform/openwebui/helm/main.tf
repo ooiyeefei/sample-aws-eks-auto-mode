@@ -1,9 +1,3 @@
-variable "namespace" {}
-variable "cluster_name" {}
-variable "openwebui_repo" {}
-variable "openwebui_chart_name" {}
-variable "openwebui_chart_version" {}
-
 resource "rafay_workload" "openwebui_helm" {
   metadata {
     name    = "openwebui"

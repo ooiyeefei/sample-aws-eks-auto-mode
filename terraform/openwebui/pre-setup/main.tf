@@ -1,8 +1,3 @@
-variable "namespace" {}
-variable "aws_region" {}
-variable "db_secret_name" {}
-variable "cluster_name" {}
-
 resource "rafay_workload" "openwebui_pre_setup" {
   metadata {
     name    = "openwebui-pre-setup"
@@ -29,8 +24,8 @@ resource "rafay_workload" "openwebui_pre_setup" {
         paths {
           name = "terraform/openwebui/pre-setup/external-secret.yaml"
         }
-        repository = var.openwebui_repo
-        revision   = var.openwebui_repo_branch
+        repository = var.openwebui_presetup_repo
+        revision   = var.openwebui_presetup_repo_branch
       }
     }
   }
