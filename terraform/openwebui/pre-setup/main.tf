@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    rafay = {
+      source  = "RafaySystems/rafay"
+      version = ">= 1.0"
+    }
+  }
+}
+
 resource "rafay_workload" "openwebui_pre_setup" {
   metadata {
     name    = "openwebui-pre-setup"
