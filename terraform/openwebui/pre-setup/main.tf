@@ -23,7 +23,7 @@ resource "rafay_workload" "external_secrets_operator" {
       artifact {
         repository    = "external-secrets"
         chart_name    = "external-secrets"
-        chart_version = "latest" # or latest stable
+        chart_version = "0.18.1"
         # values_paths can be added if you want to customize values
       }
     }
