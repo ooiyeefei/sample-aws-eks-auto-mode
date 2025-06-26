@@ -19,11 +19,6 @@ variable "db_secret_name" {
   type        = string
 }
 
-variable "secret_arns" {
-  description = "List of Secrets Manager ARNs that the External Secrets Operator can access."
-  type        = list(string)
-}
-
 variable "openwebui_pod_identity_role_name" {
   description = "The name of the IAM role created for the OpenWebUI application."
   type        = string

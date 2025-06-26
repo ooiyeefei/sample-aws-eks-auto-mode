@@ -44,59 +44,6 @@ provider "helm" {
   }
 }
 
-# --- UNIFIED PRE-SETUP SEQUENCE ---
-
-# Step 1: Create the IAM Role for the External Secrets OPERATOR
-
-module "external_secrets_pod_identity" {
-  source = "terraform-aws-modules/eks-pod-identity/aws"
-  name   = "external-secrets"
-
-  attach_custom_policy = true
-  policy_statements = [
-    {
-      sid     = "SecretsManagerAccess"
-      actions   = [
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:DescribeSecret",
-        "secretsmanager:GetResourcePolicy",
-        "secretsmanager:ListSecretVersionIds"
-      ]
-      resources = var.secret_arns 
-    }
-  ]
-
-  associations = {
-    external_secrets = {
-      service_account = "external-secrets-sa"
-      namespace       = "external-secrets"
-      cluster_name    = var.cluster_name
-    }
-  }
-}
-
-# Step 2: Install the External Secrets Operator via Helm
-# This depends on its own IAM role being created first.
-
-resource "helm_release" "external_secrets" {
-  depends_on = [module.external_secrets_pod_identity]
-
-  name             = "external-secrets"
-  repository       = "https://charts.external-secrets.io"
-  chart            = "external-secrets"
-  namespace        = "external-secrets"
-  create_namespace = true
-
-  set = [
-    { name = "installCRDs", value = "true" },
-    { name = "serviceAccount.create", value = "true" },
-    { name = "serviceAccount.name", value = "external-secrets-sa" }
-  ]
-
-  wait    = true
-  timeout = 300
-}
-
 # Step 3: Attach IAM Policy to the OpenWebUI APP Role (The "Glue")
 # This gives the actual OpenWebUI application permission to access secrets.
 resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
