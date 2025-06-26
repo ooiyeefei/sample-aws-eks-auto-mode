@@ -19,11 +19,15 @@ variable "db_secret_name" {
   type        = string
 }
 
-variable "secret_arns" {
-  description = "A list of ARNs for the AWS Secrets Manager secrets that the External Secrets operator needs permission to access."
-  type        = list(string)
+variable "openwebui_pod_identity_role_name" {
+  description = "The name of the IAM role created for the OpenWebUI application."
+  type        = string
 }
 
+variable "secrets_access_policy_arn" {
+  description = "The ARN of the IAM policy that grants access to the RDS database secret."
+  type        = string
+}
 variable "openwebui_presetup_repo" {
   description = "Git repository name for the yaml"
   type        = string
