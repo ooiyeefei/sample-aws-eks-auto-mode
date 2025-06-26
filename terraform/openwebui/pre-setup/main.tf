@@ -77,13 +77,13 @@ resource "rafay_workload" "openwebui_pre_setup" {
           name = "file://${local_file.namespace.filename}"
         }
         paths {
-          name = "file://${local_file.pgvector_job.filename}"
-        }
-        paths {
           name = "file://${local_file.cluster_secret_store.filename}"
         }
         paths {
           name = "file://${local_file.external_secret.filename}"
+        }
+        paths {
+          name = "file://${local_file.pgvector_job.filename}"
         }
       }
       type = "Yaml"
