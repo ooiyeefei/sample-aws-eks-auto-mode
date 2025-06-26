@@ -21,7 +21,7 @@ resource "rafay_workload" "external_secrets_operator" {
     artifact {
       type = "Helm"
       artifact {
-        repository    = "https://charts.external-secrets.io"
+        repository    = "external-secrets"
         chart_name    = "external-secrets"
         chart_version = "latest" # or latest stable
         # values_paths can be added if you want to customize values
