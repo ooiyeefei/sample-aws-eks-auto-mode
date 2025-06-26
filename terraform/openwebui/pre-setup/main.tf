@@ -28,7 +28,24 @@ resource "rafay_workload" "external_secrets_operator" {
       }
     }
   }
-} 
+}
+
+resource "null_resource" "wait_for_external_secrets_crds" {
+  provisioner "local-exec" {
+    command = <<EOT
+      for i in {1..30}; do
+        kubectl get crd externalsecrets.external-secrets.io && \
+        kubectl get crd clustersecretstores.external-secrets.io && \
+        exit 0
+        echo "Waiting for External Secrets CRDs to be ready..."
+        sleep 5
+      done
+      echo "CRDs not ready after 150 seconds" >&2
+      exit 1
+    EOT
+  }
+  depends_on = [rafay_workload.external_secrets_operator]
+}
 
 resource "local_file" "namespace" {
   content  = templatefile("${path.module}/namespace.yaml.tpl", {
@@ -89,9 +106,6 @@ resource "rafay_workload" "openwebui_pre_setup" {
       type = "Yaml"
     }
   }
-
-   depends_on = [
-    rafay_workload.external_secrets_operator
-  ]
+  depends_on = [null_resource.wait_for_external_secrets_crds]
 }
 
