@@ -9,11 +9,11 @@ terraform {
 
 resource "rafay_workload" "external_secrets_operator" {
   metadata {
-    name    = "external-secrets"
+    name    = var.namespace
     project = var.project_name
   }
   spec {
-    namespace = "external-secrets"
+    namespace = var.namespace
     placement {
       selector = "rafay.dev/clusterName=${var.cluster_name}"
     }
