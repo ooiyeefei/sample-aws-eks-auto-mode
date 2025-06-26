@@ -55,7 +55,6 @@ resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
 # These depend explicitly on the Helm chart finishing its installation.
 
 resource "kubernetes_manifest" "namespace" {
-  depends_on = [helm_release.external_secrets]
 
   manifest = {
     "apiVersion" = "v1"
@@ -68,7 +67,6 @@ resource "kubernetes_manifest" "namespace" {
 
 
 resource "kubernetes_manifest" "cluster_secret_store" {
-  depends_on = [helm_release.external_secrets]
 
   manifest = {
     "apiVersion" = "external-secrets.io/v1beta1"
