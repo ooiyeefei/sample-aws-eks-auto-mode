@@ -4,7 +4,21 @@ terraform {
       source  = "RafaySystems/rafay"
       version = ">= 1.0"
     }
+
+    time = {
+      source = "hashicorp/time"
+      version = ">= 0.9.1"
+    }
+    
+    local = {
+      source = "hashicorp/local"
+      version = ">= 2.5.1"
+    }
   }
+}
+
+resource "time_sleep" "wait_for_crd_propagation" {
+  create_duration = "30s"
 }
 
 resource "local_file" "namespace" {
@@ -68,7 +82,7 @@ resource "rafay_workload" "openwebui_pre_setup" {
   }
   
   depends_on = [
-    var.external_secrets_dependency
+    time_sleep.wait_for_crd_propagation
   ]
 }
 
