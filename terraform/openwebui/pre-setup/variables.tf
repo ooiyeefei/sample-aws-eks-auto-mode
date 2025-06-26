@@ -1,28 +1,28 @@
 variable "namespace" {
-  description = "Kubernetes namespace for Open WebUI"
+  description = "Kubernetes namespace for Open WebUI and its related resources."
   type        = string
   default     = "vllm-inference"
 }
 
-variable "project_name" {
-  description = "Rafay project name"
-  type        = string
-}
-
 variable "aws_region" {
-  description = "AWS region for Secrets Manager"
-  type        = string
-}
-
-variable "db_secret_name" {
-  description = "Name of the secret in AWS Secrets Manager for DB credentials"
+  description = "AWS region where the EKS cluster and Secrets Manager reside."
   type        = string
 }
 
 variable "cluster_name" {
-  description = "Name of the Rafay/EKS cluster to deploy to"
+  description = "The name of the EKS cluster to deploy to."
   type        = string
-} 
+}
+
+variable "db_secret_name" {
+  description = "The name/ARN of the secret in AWS Secrets Manager containing the database credentials."
+  type        = string
+}
+
+variable "secret_arns" {
+  description = "A list of ARNs for the AWS Secrets Manager secrets that the External Secrets operator needs permission to access."
+  type        = list(string)
+}
 
 variable "openwebui_presetup_repo" {
   description = "Git repository name for the yaml"
