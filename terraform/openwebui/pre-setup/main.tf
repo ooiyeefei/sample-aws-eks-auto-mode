@@ -89,5 +89,9 @@ resource "rafay_workload" "openwebui_pre_setup" {
       type = "Yaml"
     }
   }
+
+   depends_on = [
+    rafay_workload.external_secrets_operator
+  ]
 }
 
