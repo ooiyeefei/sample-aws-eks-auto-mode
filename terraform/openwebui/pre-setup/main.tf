@@ -9,7 +9,7 @@ terraform {
 
 resource "rafay_workload" "external_secrets_operator" {
   metadata {
-    name    = "external-secrets-operator"
+    name    = "external-secrets"
     project = var.project_name
   }
   spec {
