@@ -33,3 +33,9 @@ variable "openwebui_presetup_repo_branch" {
   description = "Git branch for the yaml"
   type        = string
 } 
+
+variable "external_secrets_dependency" {
+  description = "A dependency variable to ensure external-secrets is installed first."
+  type        = any
+  default     = null
+}
