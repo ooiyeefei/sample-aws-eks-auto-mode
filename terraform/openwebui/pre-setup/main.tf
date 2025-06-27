@@ -44,15 +44,30 @@ provider "helm" {
   }
 }
 
-data "kubernetes_crd_v1" "external_secrets_crd_wait" {
-  metadata {
-    name = "clustersecretstores.external-secrets.io"
-  }
+resource "null_resource" "crd_ready_wait" {
+  
+  # This depends_on ensures the provisioner can authenticate.
+  depends_on = [data.aws_eks_cluster_auth.cluster]
 
-  depends_on = [
-    data.aws_eks_cluster_auth.cluster
-  ]
+  provisioner "local-exec" {
+    command = <<EOT
+      for i in {1..45}; do
+        # We query the API server directly for the CRD.
+        # 'kubectl get' will exit with an error code if the resource is not found.
+        # The 'if' statement checks for a successful exit code (0).
+        if kubectl get crd clustersecretstores.external-secrets.io -o name; then
+          echo "CRD 'clustersecretstores.external-secrets.io' is discoverable."
+          exit 0
+        fi
+        echo "Attempt $i/45: CRD not yet discoverable, waiting 5 seconds..."
+        sleep 5
+      done
+      echo "Error: CRD not discoverable after more than 3 minutes."
+      exit 1
+    EOT
+  }
 }
+
 
 
 
@@ -79,7 +94,7 @@ resource "kubernetes_manifest" "namespace" {
 
 
 resource "kubernetes_manifest" "cluster_secret_store" {
-  depends_on = [data.kubernetes_crd_v1.external_secrets_crd_wait]
+  depends_on = [null_resource.crd_ready_wait]
 
   manifest = {
     "apiVersion" = "external-secrets.io/v1beta1"
