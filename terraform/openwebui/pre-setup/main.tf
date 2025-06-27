@@ -92,6 +92,28 @@ resource "rafay_workload" "openwebui_pre_setup" {
         paths {
           name = "file://${local_file.external_secret.filename}"
         }
+      }
+    }
+  }
+}
+
+resource "rafay_workload" "openwebui_pgvector_job" {
+  # This now depends on the secrets setup workload completing successfully.
+  depends_on = [rafay_workload.openwebui_secrets_setup]
+
+  metadata {
+    name    = "openwebui-pgvector-job"
+    project = var.project_name
+  }
+  spec {
+    namespace = var.namespace
+    placement {
+      selector = "rafay.dev/clusterName=${var.cluster_name}"
+    }
+    version = "v0"
+    artifact {
+      type = "Yaml"
+      artifact {
         paths {
           name = "file://${local_file.pgvector_job.filename}"
         }
