@@ -8,6 +8,7 @@ terraform {
 }
 
 resource "rafay_workload" "openwebui_helm" {
+
   metadata {
     name    = "openwebui"
     project = var.project_name
@@ -21,17 +22,10 @@ resource "rafay_workload" "openwebui_helm" {
     artifact {
       type = "Helm"
       artifact {
-        values_paths {
-          name = "values.yaml"
-        }
-        repository   = var.openwebui_helm_repo
-        chart_name   = var.openwebui_chart_name
+        repository    = var.openwebui_helm_repo
+        chart_name    = var.openwebui_chart_name
         chart_version = var.openwebui_chart_version
-        # If you want to use a custom values.yaml, add:
-        # values_paths {
-        #   name = "file://path/to/your/values.yaml"
-        # }
       }
     }
   }
-} 
+}
