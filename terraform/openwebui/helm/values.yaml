@@ -1,0 +1,21 @@
+# Override Helm chart defaults for a smaller environment
+
+# Explicitly disable the embedded Ollama chart.
+# This is the most important step to free up resources.
+ollama:
+  enabled: false
+
+# Optionally, you can also reduce the resource requests for the main pod
+# if it's still too large after disabling Ollama.
+# Find the correct keys by looking at the chart's original values.yaml.
+# This is just an example:
+#
+# resources:
+#   requests:
+#     cpu: "500m"
+#     memory: "1Gi"
+
+# The chart should automatically use the default StorageClass,
+# but being explicit is good practice.
+persistence:
+  storageClassName: "auto-ebs-sc"

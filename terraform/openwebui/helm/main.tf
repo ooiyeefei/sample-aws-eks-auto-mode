@@ -26,6 +26,10 @@ resource "rafay_workload" "openwebui_helm" {
         chart_name    = var.openwebui_chart_name
         chart_version = var.openwebui_chart_version
       }
+
+      values_paths {
+          name = "file://${path.module}/values.yaml"
+        }
     }
   }
 }
