@@ -69,9 +69,9 @@ resource "local_file" "external_secret" {
   filename = "${path.module}/external-secret.yaml"
 }
 
-resource "rafay_workload" "openwebui_pre_setup" {
+resource "rafay_workload" "openwebui_secrets_setup" {
   metadata {  
-    name    = "openwebui-pre-setup"
+    name    = "openwebui-secrets-setup"
     project = var.project_name
   }
   spec {
