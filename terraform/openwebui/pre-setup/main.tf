@@ -1,14 +1,16 @@
-# terraform/openwebui/pre-setup/main.tf
-
 terraform {
   required_providers {
+    rafay = {
+      source  = "RafaySystems/rafay"
+      version = ">= 1.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.5.1"
+    }
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.0"
-    }
-    null = {
-      source  = "hashicorp/null"
-      version = ">= 3.0.0"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -38,67 +40,62 @@ resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
   policy_arn = var.secrets_access_policy_arn
 }
 
-
-# --- Apply Manifests by Piping Directly to Kubectl Stdin ---
-
-resource "null_resource" "apply_namespace" {
-  depends_on = [data.aws_eks_cluster_auth.cluster]
-
-  provisioner "local-exec" {
-    command     = "echo \"$MANIFEST\" | kubectl apply -f -"
-    environment = {
-      MANIFEST = templatefile("${path.module}/namespace.yaml.tpl", {
-        namespace = var.namespace
-      })
-    }
-  }
+resource "local_file" "namespace" {
+  content  = templatefile("${path.module}/namespace.yaml.tpl", {
+    namespace = var.namespace
+  })
+  filename = "${path.module}/namespace.yaml"
 }
 
-resource "null_resource" "apply_cluster_secret_store" {
-  depends_on = [null_resource.apply_namespace]
-
-  # THE FIX: Use 'triggers' to safely pass variables to provisioners.
-  triggers = {
-    # This makes var.aws_region available as self.triggers.aws_region_trigger
-    aws_region_trigger = var.aws_region
-  }
-
-  # Create-time provisioner
-  provisioner "local-exec" {
-    command     = "sleep 5 && echo \"$MANIFEST\" | kubectl apply -f -"
-    interpreter = ["/bin/sh", "-c"]
-    environment = {
-      # Use the trigger value to render the manifest
-      MANIFEST = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
-        aws_region = self.triggers.aws_region_trigger
-      })
-    }
-  }
-
-  # Destroy-time provisioner
-  provisioner "local-exec" {
-    when    = "destroy"
-    command = "echo \"$MANIFEST\" | kubectl delete -f -"
-    environment = {
-      # It is now safe to use the trigger value here
-      MANIFEST = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
-        aws_region = self.triggers.aws_region_trigger
-      })
-    }
-  }
+resource "local_file" "pgvector_job" {
+  content  = templatefile("${path.module}/pgvector-job.yaml.tpl", {
+    namespace = var.namespace
+  })
+  filename = "${path.module}/pgvector-job.yaml"
 }
 
-resource "null_resource" "apply_external_secret" {
-  depends_on = [null_resource.apply_cluster_secret_store]
+resource "local_file" "cluster_secret_store" {
+  content  = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
+    aws_region = var.aws_region
+  })
+  filename = "${path.module}/cluster-secret-store.yaml"
+}
 
-  provisioner "local-exec" {
-    command     = "sleep 5 && echo \"$MANIFEST\" | kubectl apply -f -"
-    interpreter = ["/bin/sh", "-c"]
-    environment = {
-      MANIFEST = templatefile("${path.module}/external-secret.yaml.tpl", {
-        namespace      = var.namespace,
-        db_secret_name = var.db_secret_name
-      })
+resource "local_file" "external_secret" {
+  content  = templatefile("${path.module}/external-secret.yaml.tpl", {
+    namespace      = var.namespace,
+    db_secret_name = var.db_secret_name
+  })
+  filename = "${path.module}/external-secret.yaml"
+}
+
+resource "rafay_workload" "openwebui_pre_setup" {
+  metadata {  
+    name    = "openwebui-pre-setup"
+    project = var.project_name
+  }
+  spec {
+    namespace = var.namespace
+    placement {
+      selector = "rafay.dev/clusterName=${var.cluster_name}"
+    }
+    version = "v0"
+    artifact {
+      type = "Yaml"
+      artifact {
+        paths {
+          name = "file://${local_file.namespace.filename}"
+        }
+        paths {
+          name = "file://${local_file.cluster_secret_store.filename}"
+        }
+        paths {
+          name = "file://${local_file.external_secret.filename}"
+        }
+        paths {
+          name = "file://${local_file.pgvector_job.filename}"
+        }
+      }
     }
   }
 }
