@@ -35,6 +35,13 @@ provider "kubernetes" {
   token                  = data.aws_eks_cluster_auth.cluster.token
 }
 
+# --- Render all YAML files to disk using the simple filename pattern ---
+
+resource "local_file" "storage_class" {
+  content  = templatefile("${path.module}/storage-class.yaml.tpl", {})
+  filename = "storage-class.yaml"
+}
+
 resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
   role       = var.openwebui_pod_identity_role_name
   policy_arn = var.secrets_access_policy_arn
@@ -71,6 +78,7 @@ resource "local_file" "pgvector_job" {
 
 resource "rafay_workload" "openwebui_secrets_setup" {
   depends_on = [
+    local_file.storage_class,
     local_file.namespace,
     local_file.cluster_secret_store,
     local_file.external_secret
@@ -89,6 +97,9 @@ resource "rafay_workload" "openwebui_secrets_setup" {
     artifact {
       type = "Yaml"
       artifact {
+        paths {
+          name = "file://storage-class.yaml"
+        }
         paths {
           name = "file://namespace.yaml"
         }
