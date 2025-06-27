@@ -71,7 +71,6 @@ resource "local_file" "pgvector_job" {
 
 resource "rafay_workload" "openwebui_secrets_setup" {
   depends_on = [
-    rafay_workload.external_secrets_operator,
     local_file.namespace,
     local_file.cluster_secret_store,
     local_file.external_secret
