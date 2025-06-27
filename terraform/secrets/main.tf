@@ -116,3 +116,29 @@ resource "helm_release" "external_secrets" {
   wait = true
   timeout = 300
 } 
+
+module "aws_ebs_csi_pod_identity" {
+  source = "terraform-aws-modules/eks-pod-identity/aws"
+  
+  name = "${var.cluster_name}-ebs-csi-driver"
+
+  attach_aws_ebs_csi_policy = true
+
+  # Set the common values for all associations here.
+  association_defaults = {
+    namespace       = "kube-system"
+    service_account = "ebs-csi-controller-sa"
+  }
+
+  # Provide the unique values for each association.
+  # The key 'this_cluster' is a logical map key for Terraform.
+  associations = {
+    this_cluster = {
+      cluster_name = var.cluster_name
+    }
+  }
+
+  tags = {
+    Environment = var.name
+  }
+}
