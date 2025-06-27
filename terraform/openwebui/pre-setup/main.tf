@@ -46,20 +46,18 @@ resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
 }
 
 # --- Step 1: Render the YAML files to disk ---
-# The 'plan' for these is simple and will always succeed.
-resource "local_file" "namespace" {
+#resource "local_file" "namespace" {
   content  = templatefile("${path.module}/namespace.yaml.tpl", {
     namespace = var.namespace
   })
-  filename = "${path.module}/namespace.yaml"
+  filename = "./namespace.yaml" 
 }
 
 resource "local_file" "cluster_secret_store" {
   content  = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
-    # No namespace here
     aws_region = var.aws_region
   })
-  filename = "${path.module}/cluster-secret-store.yaml"
+  filename = "./cluster-secret-store.yaml"
 }
 
 resource "local_file" "external_secret" {
@@ -67,7 +65,7 @@ resource "local_file" "external_secret" {
     namespace      = var.namespace,
     db_secret_name = var.db_secret_name
   })
-  filename = "${path.module}/external-secret.yaml"
+  filename = "./external-secret.yaml"
 }
 
 
