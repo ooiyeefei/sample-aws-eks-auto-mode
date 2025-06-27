@@ -35,16 +35,16 @@ provider "kubernetes" {
   token                  = data.aws_eks_cluster_auth.cluster.token
 }
 
+resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
+  role       = var.openwebui_pod_identity_role_name
+  policy_arn = var.secrets_access_policy_arn
+}
+
 # --- Render all YAML files to disk using the simple filename pattern ---
 
 resource "local_file" "storage_class" {
   content  = templatefile("${path.module}/storage-class.yaml.tpl", {})
   filename = "storage-class.yaml"
-}
-
-resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
-  role       = var.openwebui_pod_identity_role_name
-  policy_arn = var.secrets_access_policy_arn
 }
 
 resource "local_file" "namespace" {
