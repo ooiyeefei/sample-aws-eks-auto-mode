@@ -24,6 +24,11 @@ variable "openwebui_pod_identity_role_name" {
   type        = string
 }
 
+variable "project_name" {
+  description = "Rafay Project Name"
+  type        = string
+}
+
 variable "secrets_access_policy_arn" {
   description = "The ARN of the IAM policy that grants access to the RDS database secret."
   type        = string
