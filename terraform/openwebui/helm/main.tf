@@ -27,7 +27,10 @@ resource "rafay_workload" "openwebui_helm" {
         chart_version = var.openwebui_chart_version
         
         values_paths {
-          name = "file://${path.module}/values.yaml"
+          name = templatefile("${path.module}/values.yaml", {
+            s3_bucket_name = var.s3_bucket_name
+            region         = var.aws_region
+          })
         }
       }
     }

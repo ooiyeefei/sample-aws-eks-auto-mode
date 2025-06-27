@@ -1,23 +1,33 @@
-# Override Helm chart defaults for a smaller environment
+# Open WebUI Helm Chart Values
 
-# Explicitly disable the embedded Ollama chart.
-# This is the most important step to free up resources.
+# Configure persistence to use S3
+persistence:
+  enabled: true
+  provider: "s3"
+  s3:
+    bucket: "${s3_bucket_name}"
+    region: "${region}"
+    endpointUrl: "https://s3.${region}.amazonaws.com"
+
+# Configure service account for Pod Identity
+serviceAccount:
+  enable: true
+  name: "open-webui-pia"  # Must match the service_account in the Pod Identity association
+
+# Configure environment variables
+extraEnvVars:
+  # Database configuration for PostgreSQL with pg_vector
+  - name: "DATABASE_URL"
+    valueFrom:
+      secretKeyRef:
+        name: "openwebui-db-credentials"
+        key: "url"
+  - name: "VECTOR_DB"
+    value: "pgvector"
+  
+
+openaiBaseApiUrls: ["http://vllm-service/v1"]
+
+# Disable the embedded Ollama chart
 ollama:
   enabled: false
-
-# Optionally, you can also reduce the resource requests for the main pod
-# if it's still too large after disabling Ollama.
-# Find the correct keys by looking at the chart's original values.yaml.
-# This is just an example:
-#
-# resources:
-#   requests:
-#     cpu: "500m"
-#     memory: "1Gi"
-
-affinity: {}
-
-# The chart should automatically use the default StorageClass,
-# but being explicit is good practice.
-persistence:
-  storageClassName: "auto-ebs-sc"

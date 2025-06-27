@@ -27,4 +27,14 @@ variable "openwebui_chart_name" {
 variable "openwebui_chart_version" {
   description = "Helm chart version"
   type        = string
-} 
+}
+
+variable "aws_region" {
+  description = "The AWS region where the S3 bucket is located. This is required by the values.yaml template."
+  type        = string
+}
+
+variable "s3_bucket_name" {
+  description = "The name of the S3 bucket for OpenWebUI document persistence. This is required by the values.yaml template."
+  type        = string
+}
