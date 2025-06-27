@@ -44,21 +44,14 @@ resource "local_file" "namespace" {
   content  = templatefile("${path.module}/namespace.yaml.tpl", {
     namespace = var.namespace
   })
-  filename = "${path.module}/namespace.yaml"
-}
-
-resource "local_file" "pgvector_job" {
-  content  = templatefile("${path.module}/pgvector-job.yaml.tpl", {
-    namespace = var.namespace
-  })
-  filename = "${path.module}/pgvector-job.yaml"
+  filename = "namespace.yaml" # Use simple filename
 }
 
 resource "local_file" "cluster_secret_store" {
   content  = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
     aws_region = var.aws_region
   })
-  filename = "${path.module}/cluster-secret-store.yaml"
+  filename = "cluster-secret-store.yaml"
 }
 
 resource "local_file" "external_secret" {
@@ -66,10 +59,24 @@ resource "local_file" "external_secret" {
     namespace      = var.namespace,
     db_secret_name = var.db_secret_name
   })
-  filename = "${path.module}/external-secret.yaml"
+  filename = "external-secret.yaml"
+}
+
+resource "local_file" "pgvector_job" {
+  content  = templatefile("${path.module}/pgvector-job.yaml.tpl", {
+    namespace = var.namespace
+  })
+  filename = "pgvector-job.yaml"
 }
 
 resource "rafay_workload" "openwebui_secrets_setup" {
+  depends_on = [
+    rafay_workload.external_secrets_operator,
+    local_file.namespace,
+    local_file.cluster_secret_store,
+    local_file.external_secret
+  ]
+
   metadata {  
     name    = "openwebui-secrets-setup"
     project = var.project_name
@@ -84,13 +91,13 @@ resource "rafay_workload" "openwebui_secrets_setup" {
       type = "Yaml"
       artifact {
         paths {
-          name = "file://${local_file.namespace.filename}"
+          name = "file://namespace.yaml"
         }
         paths {
-          name = "file://${local_file.cluster_secret_store.filename}"
+          name = "file://cluster-secret-store.yaml"
         }
         paths {
-          name = "file://${local_file.external_secret.filename}"
+          name = "file://external-secret.yaml"
         }
       }
     }
@@ -98,8 +105,10 @@ resource "rafay_workload" "openwebui_secrets_setup" {
 }
 
 resource "rafay_workload" "openwebui_pgvector_job" {
-  # This now depends on the secrets setup workload completing successfully.
-  depends_on = [rafay_workload.openwebui_secrets_setup]
+  depends_on = [
+    rafay_workload.openwebui_secrets_setup,
+    local_file.pgvector_job
+  ]
 
   metadata {
     name    = "openwebui-pgvector-job"
@@ -115,7 +124,7 @@ resource "rafay_workload" "openwebui_pgvector_job" {
       type = "Yaml"
       artifact {
         paths {
-          name = "file://${local_file.pgvector_job.filename}"
+          name = "file://pgvector-job.yaml"
         }
       }
     }
