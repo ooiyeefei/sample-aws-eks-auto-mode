@@ -1,18 +1,19 @@
 terraform {
   required_providers {
-    helm = {
-      source  = "hashicorp/helm"
-      version = ">= 2.0"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 2.20.0"
-    }
+    # We only need aws for auth, and local/null for the apply logic.
+    # The kubernetes provider is NOT used to apply manifests here.
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.0"
     }
-    # NOTE: time_sleep is no longer needed
+    local = {
+      source = "hashicorp/local"
+      version = ">= 2.5.1"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = ">= 3.0.0"
+    }
   }
 }
 
@@ -36,151 +37,62 @@ provider "kubernetes" {
   token                  = data.aws_eks_cluster_auth.cluster.token
 }
 
-provider "helm" {
-  kubernetes = {
-    host                   = data.aws_eks_cluster.cluster.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-    token                  = data.aws_eks_cluster_auth.cluster.token
-  }
-}
 
-resource "null_resource" "crd_ready_wait" {
-  
-  # This depends_on ensures the provisioner can authenticate.
-  depends_on = [data.aws_eks_cluster_auth.cluster]
-
-  provisioner "local-exec" {
-    command = <<EOT
-      for i in {1..45}; do
-        # We query the API server directly for the CRD.
-        # 'kubectl get' will exit with an error code if the resource is not found.
-        # The 'if' statement checks for a successful exit code (0).
-        if kubectl get crd clustersecretstores.external-secrets.io -o name; then
-          echo "CRD 'clustersecretstores.external-secrets.io' is discoverable."
-          exit 0
-        fi
-        echo "Attempt $i/45: CRD not yet discoverable, waiting 5 seconds..."
-        sleep 5
-      done
-      echo "Error: CRD not discoverable after more than 3 minutes."
-      exit 1
-    EOT
-  }
-}
-
-
-
-
-# Step 3: Attach IAM Policy to the OpenWebUI APP Role (The "Glue")
+# Attach IAM Policy to the OpenWebUI APP Role (The "Glue")
 # This gives the actual OpenWebUI application permission to access secrets.
 resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
   role       = var.openwebui_pod_identity_role_name
   policy_arn = var.secrets_access_policy_arn
 }
 
-# Step 4: Create the Kubernetes resources for the application
-# These depend explicitly on the Helm chart finishing its installation.
+# --- Step 1: Render the YAML files to disk ---
+# The 'plan' for these is simple and will always succeed.
+resource "local_file" "namespace" {
+  content  = templatefile("${path.module}/namespace.yaml.tpl", {
+    namespace = var.namespace
+  })
+  filename = "${path.module}/namespace.yaml"
+}
 
-resource "kubernetes_manifest" "namespace" {
+resource "local_file" "cluster_secret_store" {
+  content  = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
+    # No namespace here
+    aws_region = var.aws_region
+  })
+  filename = "${path.module}/cluster-secret-store.yaml"
+}
 
-  manifest = {
-    "apiVersion" = "v1"
-    "kind"       = "Namespace"
-    "metadata" = {
-      "name" = var.namespace
-    }
-  }
+resource "local_file" "external_secret" {
+  content  = templatefile("${path.module}/external-secret.yaml.tpl", {
+    namespace      = var.namespace,
+    db_secret_name = var.db_secret_name
+  })
+  filename = "${path.module}/external-secret.yaml"
 }
 
 
-resource "kubernetes_manifest" "cluster_secret_store" {
-  depends_on = [null_resource.crd_ready_wait]
-
-  manifest = {
-    "apiVersion" = "external-secrets.io/v1beta1"
-    "kind"       = "ClusterSecretStore"
-    "metadata" = {
-      "name" = "aws-secrets"
-    }
-    "spec" = {
-      "provider" = {
-        "aws" = {
-          "service" = "SecretsManager"
-          "region"  = var.aws_region
-        }
-      }
-    }
-  }
-}
-
-
-resource "kubernetes_manifest" "external_secret" {
+# --- Step 2: Use a Provisioner to Apply the Files ---
+# The 'plan' for a null_resource is always trivial. The real work
+# happens at 'apply' time.
+resource "null_resource" "apply_manifests" {
+  
+  # This makes the resource depend on the files being written first.
   depends_on = [
-    kubernetes_manifest.namespace,
-    kubernetes_manifest.cluster_secret_store
+    local_file.namespace,
+    local_file.cluster_secret_store,
+    local_file.external_secret
   ]
 
-  manifest = {
-    "apiVersion" = "external-secrets.io/v1beta1"
-    "kind"       = "ExternalSecret"
-    "metadata" = {
-      "name"      = "openwebui-db-credentials"
-      "namespace" = var.namespace
-    }
-    "spec" = {
-      "refreshInterval" = "1h"
-      "secretStoreRef" = {
-        "name" = "aws-secrets"
-        "kind" = "ClusterSecretStore"
-      }
-      "target" = {
-        "name"           = "openwebui-db-credentials"
-        "creationPolicy" = "Owner"
-      }
-      "data" = [
-        {
-          "secretKey" = "url"
-          "remoteRef" = {
-            "key"      = var.db_secret_name
-            "property" = "connectionString"
-          }
-        },
-        {
-          "secretKey" = "dbname"
-          "remoteRef" = {
-            "key"      = var.db_secret_name
-            "property" = "dbname"
-          }
-        },
-        {
-          "secretKey" = "host"
-          "remoteRef" = {
-            "key"      = var.db_secret_name
-            "property" = "host"
-          }
-        },
-        {
-          "secretKey" = "password"
-          "remoteRef" = {
-            "key"      = var.db_secret_name
-            "property" = "password"
-          }
-        },
-        {
-          "secretKey" = "port"
-          "remoteRef" = {
-            "key"      = var.db_secret_name
-            "property" = "port"
-          }
-        },
-        {
-          "secretKey" = "username"
-          "remoteRef" = {
-            "key"      = var.db_secret_name
-            "property" = "username"
-          }
-        },
-      ]
-    }
+  # This provisioner runs during the 'apply' phase, after auth is configured.
+  provisioner "local-exec" {
+    # The command is the exact manual command we know works.
+    # It applies the files in a specific, reliable order.
+    command = <<EOT
+      kubectl apply -f ${local_file.namespace.filename} && \
+      echo "Namespace applied. Waiting 5 seconds..." && sleep 5 && \
+      kubectl apply -f ${local_file.cluster_secret_store.filename} && \
+      echo "ClusterSecretStore applied. Waiting 5 seconds..." && sleep 5 && \
+      kubectl apply -f ${local_file.external_secret.filename}
+    EOT
   }
 }
