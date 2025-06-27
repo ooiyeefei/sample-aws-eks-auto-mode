@@ -44,9 +44,16 @@ provider "helm" {
   }
 }
 
-data "kubernetes_api_service" "external_secrets_crd" {
-  name = "v1beta1.external-secrets.io"
+data "kubernetes_crd_v1" "external_secrets_crd_wait" {
+  metadata {
+    name = "clustersecretstores.external-secrets.io"
+  }
+
+  depends_on = [
+    data.aws_eks_cluster_auth.cluster
+  ]
 }
+
 
 
 # Step 3: Attach IAM Policy to the OpenWebUI APP Role (The "Glue")
@@ -72,7 +79,7 @@ resource "kubernetes_manifest" "namespace" {
 
 
 resource "kubernetes_manifest" "cluster_secret_store" {
-  depends_on = [data.kubernetes_api_service.external_secrets_crd]
+  depends_on = [data.kubernetes_crd_v1.external_secrets_crd_wait]
 
   manifest = {
     "apiVersion" = "external-secrets.io/v1beta1"
