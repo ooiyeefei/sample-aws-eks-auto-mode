@@ -44,6 +44,11 @@ provider "helm" {
   }
 }
 
+data "kubernetes_api_service" "external_secrets_crd" {
+  name = "v1beta1.external-secrets.io"
+}
+
+
 # Step 3: Attach IAM Policy to the OpenWebUI APP Role (The "Glue")
 # This gives the actual OpenWebUI application permission to access secrets.
 resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
@@ -67,6 +72,7 @@ resource "kubernetes_manifest" "namespace" {
 
 
 resource "kubernetes_manifest" "cluster_secret_store" {
+  depends_on = [data.kubernetes_api_service.external_secrets_crd]
 
   manifest = {
     "apiVersion" = "external-secrets.io/v1beta1"
