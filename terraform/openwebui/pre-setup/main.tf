@@ -45,52 +45,69 @@ resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
   policy_arn = var.secrets_access_policy_arn
 }
 
-# --- Step 1: Render the YAML files to disk ---
-resource "local_file" "namespace" {
-  content  = templatefile("${path.module}/namespace.yaml.tpl", {
-    namespace = var.namespace
-  })
-  filename = "./namespace.yaml" 
-}
+resource "null_resource" "apply_namespace" {
+  # This depends on auth being ready.
+  depends_on = [data.aws_eks_cluster_auth.cluster]
 
-resource "local_file" "cluster_secret_store" {
-  content  = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
-    aws_region = var.aws_region
-  })
-  filename = "./cluster-secret-store.yaml"
-}
-
-resource "local_file" "external_secret" {
-  content  = templatefile("${path.module}/external-secret.yaml.tpl", {
-    namespace      = var.namespace,
-    db_secret_name = var.db_secret_name
-  })
-  filename = "./external-secret.yaml"
-}
-
-
-# --- Step 2: Use a Provisioner to Apply the Files ---
-# The 'plan' for a null_resource is always trivial. The real work
-# happens at 'apply' time.
-resource "null_resource" "apply_manifests" {
-  
-  # This makes the resource depend on the files being written first.
-  depends_on = [
-    local_file.namespace,
-    local_file.cluster_secret_store,
-    local_file.external_secret
-  ]
-
-  # This provisioner runs during the 'apply' phase, after auth is configured.
   provisioner "local-exec" {
-    # The command is the exact manual command we know works.
-    # It applies the files in a specific, reliable order.
-    command = <<EOT
-      kubectl apply -f ${local_file.namespace.filename} && \
-      echo "Namespace applied. Waiting 5 seconds..." && sleep 5 && \
-      kubectl apply -f ${local_file.cluster_secret_store.filename} && \
-      echo "ClusterSecretStore applied. Waiting 5 seconds..." && sleep 5 && \
-      kubectl apply -f ${local_file.external_secret.filename}
-    EOT
+    # 'kubectl apply -f -' reads from standard input.
+    command = "echo \"$MANIFEST\" | kubectl apply -f -"
+    
+    # The 'environment' map passes the rendered YAML content into the
+    # shell's environment as a variable named MANIFEST.
+    environment = {
+      MANIFEST = templatefile("${path.module}/namespace.yaml.tpl", {
+        namespace = var.namespace
+      })
+    }
+  }
+}
+
+resource "null_resource" "apply_cluster_secret_store" {
+  # This depends on the namespace apply finishing.
+  depends_on = [null_resource.apply_namespace]
+
+  provisioner "local-exec" {
+    command     = "echo \"$MANIFEST\" | kubectl apply -f -"
+    interpreter = ["/bin/sh", "-c"] # Good practice for complex commands
+
+    # Add a small, deliberate pause before applying.
+    on_failure  = "continue" # Prevent failure from stopping the whole chain
+    
+    environment = {
+      MANIFEST = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
+        aws_region = var.aws_region
+      })
+    }
+    
+    # Run a wait command after applying
+    post_apply_command = "sleep 5"
+  }
+  
+   provisioner "local-exec" {
+     when = "destroy"
+     command = "echo \"$MANIFEST\" | kubectl delete -f -"
+      environment = {
+      MANIFEST = templatefile("${path.module}/cluster-secret-store.yaml.tpl", {
+        aws_region = var.aws_region
+      })
+    }
+   }
+}
+
+
+resource "null_resource" "apply_external_secret" {
+  # This depends on the ClusterSecretStore apply finishing.
+  depends_on = [null_resource.apply_cluster_secret_store]
+
+  provisioner "local-exec" {
+    command = "echo \"$MANIFEST\" | kubectl apply -f -"
+    
+    environment = {
+      MANIFEST = templatefile("${path.module}/external-secret.yaml.tpl", {
+        namespace      = var.namespace,
+        db_secret_name = var.db_secret_name
+      })
+    }
   }
 }
