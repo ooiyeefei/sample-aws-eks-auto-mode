@@ -51,7 +51,7 @@ resource "local_file" "namespace" {
   content  = templatefile("${path.module}/namespace.yaml.tpl", {
     namespace = var.namespace
   })
-  filename = "namespace.yaml" # Use simple filename
+  filename = "namespace.yaml"
 }
 
 resource "local_file" "cluster_secret_store" {
