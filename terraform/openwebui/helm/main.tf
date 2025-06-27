@@ -25,11 +25,11 @@ resource "rafay_workload" "openwebui_helm" {
         repository    = var.openwebui_helm_repo
         chart_name    = var.openwebui_chart_name
         chart_version = var.openwebui_chart_version
-      }
-
-      values_paths {
+        
+        values_paths {
           name = "file://${path.module}/values.yaml"
         }
+      }
     }
   }
 }
