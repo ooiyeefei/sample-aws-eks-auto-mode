@@ -46,7 +46,7 @@ resource "aws_iam_role_policy_attachment" "secrets_access_to_openwebui" {
 }
 
 # --- Step 1: Render the YAML files to disk ---
-#resource "local_file" "namespace" {
+resource "local_file" "namespace" {
   content  = templatefile("${path.module}/namespace.yaml.tpl", {
     namespace = var.namespace
   })
