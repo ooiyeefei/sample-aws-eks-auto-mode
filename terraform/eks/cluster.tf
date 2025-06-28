@@ -146,10 +146,6 @@ module "eks" {
     eks-pod-identity-agent = {
       most_recent = true
     }
-    aws-load-balancer-controller = {
-      most_recent = true
-      attach_policy_arns = [aws_iam_policy.aws_load_balancer_controller.arn]
-    }
   }
 
   # Cluster security group
