@@ -4,10 +4,25 @@ terraform {
       source  = "RafaySystems/rafay"
       version = ">= 1.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.5.1"
+    }
   }
 }
 
+resource "local_file" "openwebui_values_yaml" {
+  content  = templatefile("${path.module}/values.yaml.tpl", {
+    s3_bucket_name = var.s3_bucket_name
+    region         = var.aws_region
+  })
+  filename = "values.yaml"
+}
+
 resource "rafay_workload" "openwebui_helm" {
+  depends_on = [
+    local_file.openwebui_values_yaml
+  ]
 
   metadata {
     name    = "openwebui"
@@ -27,10 +42,7 @@ resource "rafay_workload" "openwebui_helm" {
         chart_version = var.openwebui_chart_version
         
         values_paths {
-          name = templatefile("values.yaml", {
-            s3_bucket_name = var.s3_bucket_name
-            region         = var.aws_region
-          })
+          name = "file://values.yaml"
         }
       }
     }
