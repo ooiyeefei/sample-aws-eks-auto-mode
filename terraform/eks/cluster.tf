@@ -210,7 +210,7 @@ module "aws_load_balancer_controller_irsa_role" {
   tags = local.tags
 }
 
-resource "kubernetes_service_account" "aws_load_balancer_controller" {
+resource "kubernetes_service_account" "alb_sa" {
   metadata {
     name      = "aws-load-balancer-controller"
     namespace = "kube-system"
@@ -240,7 +240,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   namespace  = "kube-system"
 
   depends_on = [
-    kubernetes_service_account.aws_load_balancer_controller
+    kubernetes_service_account.alb_sa
   ]
 
   set {
