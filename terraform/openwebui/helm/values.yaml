@@ -1,3 +1,5 @@
+# Open WebUI Helm Chart Values
+
 # Configure persistence to use S3
 persistence:
   enabled: true
