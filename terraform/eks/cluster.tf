@@ -181,7 +181,9 @@ module "eks" {
     }
   }
 
-  tags = local.tags
+  tags = merge(local.tags, {
+    "kubernetes.io/cluster/${var.name}" = "shared"
+  })
 } 
 
 resource "aws_security_group_rule" "allow_nlb_to_nodes" {
