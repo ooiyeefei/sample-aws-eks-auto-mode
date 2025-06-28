@@ -48,3 +48,38 @@ resource "rafay_workload" "openwebui_helm" {
     }
   }
 }
+
+resource "rafay_workload" "openwebui_load_balancer" {
+  depends_on = [
+    rafay_workload.openwebui_helm
+  ]
+
+  metadata {
+    name    = "openwebui-load-balancer"
+    project = var.project_name
+  }
+  spec {
+    namespace = var.namespace
+    placement {
+      selector = "rafay.dev/clusterName=${var.cluster_name}"
+    }
+    version = "v0"
+    artifact {
+      type = "Yaml"
+      artifact {
+        paths {
+          name = "file://lb.yaml"
+        }
+      }
+    }
+  }
+}
+
+data "kubernetes_service" "openwebui_lb" {
+  depends_on = [rafay_workload.openwebui_load_balancer]
+
+  metadata {
+    name      = "open-webui-service"
+    namespace = var.namespace
+  }
+}

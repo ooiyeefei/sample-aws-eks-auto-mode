@@ -1,4 +1,22 @@
 ################################################################################
+# IAM Policy for the AWS Load Balancer Controller
+# This section automates the creation of the required IAM policy.
+# It fetches the policy JSON from the official Kubernetes SIGs repository,
+# ensuring you always have the correct permissions as recommended by AWS.
+################################################################################
+
+data "http" "load_balancer_controller_policy" {
+  url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json"
+}
+
+resource "aws_iam_policy" "aws_load_balancer_controller" {
+  name        = "${var.name}-AWSLoadBalancerControllerIAMPolicy"
+  description = "IAM policy for the AWS LoadBalancer Controller"
+  policy      = data.http.load_balancer_controller_policy.response_body
+  tags        = local.tags
+}
+
+################################################################################
 # Cluster
 ################################################################################
 
@@ -145,6 +163,10 @@ module "eks" {
     }
     eks-pod-identity-agent = {
       most_recent = true
+    }
+    aws-load-balancer-controller = {
+      most_recent = true
+      attach_policy_arns = [aws_iam_policy.aws_load_balancer_controller.arn]
     }
   }
 
