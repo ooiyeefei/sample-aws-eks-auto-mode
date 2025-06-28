@@ -4,7 +4,7 @@ metadata:
   name: auto-ebs-sc
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
-provisioner: ebs.csi.eks.amazonaws.com
+provisioner: ebs.csi.aws.com
 volumeBindingMode: WaitForFirstConsumer
 parameters:
   type: gp3
