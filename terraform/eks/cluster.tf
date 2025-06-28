@@ -1,22 +1,4 @@
 ################################################################################
-# IAM Policy for the AWS Load Balancer Controller
-# This section automates the creation of the required IAM policy.
-# It fetches the policy JSON from the official Kubernetes SIGs repository,
-# ensuring you always have the correct permissions as recommended by AWS.
-################################################################################
-
-data "http" "load_balancer_controller_policy" {
-  url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json"
-}
-
-resource "aws_iam_policy" "aws_load_balancer_controller" {
-  name        = "${var.name}-AWSLoadBalancerControllerIAMPolicy"
-  description = "IAM policy for the AWS LoadBalancer Controller"
-  policy      = data.http.load_balancer_controller_policy.response_body
-  tags        = local.tags
-}
-
-################################################################################
 # Cluster
 ################################################################################
 
@@ -205,3 +187,81 @@ module "eks" {
 
   tags = local.tags
 } 
+
+################################################################################
+# Create the Kubernetes Service Account
+################################################################################
+
+module "aws_load_balancer_controller_irsa_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.39"
+
+  role_name_prefix = "${var.name}-LBCRole"
+
+  attach_load_balancer_controller_policy = true
+
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
+    }
+  }
+
+  tags = local.tags
+}
+
+resource "kubernetes_service_account" "aws_load_balancer_controller" {
+  metadata {
+    name      = "aws-load-balancer-controller"
+    namespace = "kube-system"
+    labels = {
+      "app.kubernetes.io/name"      = "aws-load-balancer-controller"
+      "app.kubernetes.io/component" = "controller"
+    }
+    annotations = {
+      # Links the Service Account to the IAM Role we created.
+      "eks.amazonaws.com/role-arn" = module.aws_load_balancer_controller_irsa_role.iam_role_arn
+      
+      # Best-practice annotation for STS endpoints.
+      "eks.amazonaws.com/sts-regional-endpoints" = "true"
+    }
+  }
+  depends_on = [module.eks]
+}
+
+################################################################################
+# Install the AWS Load Balancer Controller using the Helm provider
+################################################################################
+
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+
+  depends_on = [
+    kubernetes_service_account.aws_load_balancer_controller
+  ]
+
+  set {
+    name  = "serviceAccount.create"
+    value = "false"
+  }
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+
+  set {
+    name  = "clusterName"
+    value = var.name
+  }
+  set {
+    name  = "region"
+    value = var.region
+  }
+  set {
+    name  = "vpcId"
+    value = module.vpc.vpc_id
+  }
+}
