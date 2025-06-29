@@ -158,14 +158,6 @@ module "eks" {
       type                      = "ingress"
       source_node_security_group = true
     }
-    ingress_internet_to_nlb_on_80 = {
-      description = "Allow HTTP traffic from the internet to the NLB"
-      protocol    = "tcp"
-      from_port   = 80
-      to_port     = 80
-      type        = "ingress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
   }
 
   # Node security group
@@ -194,6 +186,14 @@ module "eks" {
       to_port     = 8080
       type        = "ingress"
       cidr_blocks = [module.vpc.vpc_cidr_block]
+    }
+    allow_internet_to_openwebui_pods = {
+      description = "Allow internet traffic to OpenWebUI pods via NLB"
+      protocol    = "tcp"
+      from_port   = 80
+      to_port     = 80
+      type        = "ingress"
+      cidr_blocks = ["0.0.0.0/0"]
     }
   }
 
