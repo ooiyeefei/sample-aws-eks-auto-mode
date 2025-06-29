@@ -158,6 +158,14 @@ module "eks" {
       type                      = "ingress"
       source_node_security_group = true
     }
+    ingress_internet_to_nlb_on_80 = {
+      description = "Allow HTTP traffic from the internet to the NLB"
+      protocol    = "tcp"
+      from_port   = 80
+      to_port     = 80
+      type        = "ingress"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
   }
 
   # Node security group
@@ -180,7 +188,7 @@ module "eks" {
       ipv6_cidr_blocks = ["::/0"]
     }
     ingress_from_vpc_on_8080 = {
-      description = "Allow NLB traffic to nodes on port 8080"
+      description = "Allow NLB traffic to nodes on application port 8080"
       protocol    = "tcp"
       from_port   = 8080
       to_port     = 8080

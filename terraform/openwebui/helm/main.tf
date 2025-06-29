@@ -86,9 +86,17 @@ resource "rafay_workload" "openwebui_helm" {
   }
 }
 
+resource "local_file" "load_balancer_yaml" {
+  content = templatefile("${path.module}/lb.yaml.tpl", {
+    node_security_group_id = var.node_security_group_id
+  })
+  filename = "lb.yaml"
+}
+
 resource "rafay_workload" "openwebui_load_balancer" {
   depends_on = [
     rafay_workload.openwebui_helm
+    local_file.load_balancer_yaml
   ]
 
   metadata {

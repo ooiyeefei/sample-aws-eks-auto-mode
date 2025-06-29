@@ -38,3 +38,8 @@ variable "s3_bucket_name" {
   description = "The name of the S3 bucket for OpenWebUI document persistence. This is required by the values.yaml template."
   type        = string
 }
+
+variable "node_security_group_id" {
+  description = "The ID of the worker node security group to be used by the NLB."
+  type        = string
+}

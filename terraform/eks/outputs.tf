@@ -67,4 +67,9 @@ output "kube_token" {
   description = "Short-lived token for authenticating to the EKS cluster"
   value       = data.aws_eks_cluster_auth.this.token
   sensitive   = true
-} 
+}
+ 
+output "node_security_group_id" {
+  description = "The ID of the security group attached to the EKS worker nodes."
+  value       = module.eks.node_security_group_id
+}
