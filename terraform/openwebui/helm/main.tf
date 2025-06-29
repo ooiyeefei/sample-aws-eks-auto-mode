@@ -155,19 +155,16 @@ resource "time_sleep" "wait_for_lb_provisioning" {
   create_duration = "90s"
 }
 
-resource "null_resource" "get_lb_hostname" {
+data "external" "load_balancer_info" {
   depends_on = [
-    time_sleep.wait_for_lb_provisioning,
+    rafay_workload.openwebui_load_balancer,
     local_sensitive_file.kubeconfig
   ]
 
-  provisioner "local-exec" {
-    command = "kubectl --kubeconfig /tmp/kubeconfig get service open-webui-service -n ${var.namespace} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' > /tmp/lb_hostname.txt"
-  }
-}
+  program = ["bash", "${path.module}/get-lb-hostname.sh"]
 
-# Step 4: Read the result from the output file.
-data "local_file" "load_balancer_hostname" {
-  depends_on = [null_resource.get_lb_hostname]
-  filename   = "/tmp/lb_hostname.txt"
+  query = {
+    namespace    = var.namespace
+    service_name = "open-webui-service"
+  }
 }
