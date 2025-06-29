@@ -94,7 +94,7 @@ resource "time_sleep" "wait_for_lb" {
   create_duration = "120s"
 }
 
-data "kubernetes_service" "openwebui_lb" {
+data "kubernetes_ingress_v1" "openwebui_lb" {
   depends_on = [time_sleep.wait_for_lb]
 
   metadata {
