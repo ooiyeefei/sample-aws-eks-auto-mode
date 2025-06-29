@@ -20,11 +20,32 @@ terraform {
       source = "hashicorp/aws"
       version = ">= 5.0"
     }
-    external = {
-      source  = "hashicorp/external"
-      version = "~> 2.3"
+    null = {
+      source = "hashicorp/null"
+      version = ">= 3.0.0"
     }
   }
+}
+
+################################################################################
+# Direct EKS Authentication
+# This section ensures that any 'kubectl' commands run by provisioners
+# are correctly authenticated to the target EKS cluster.
+################################################################################
+
+provider "aws" {
+  region = var.aws_region
+}
+data "aws_eks_cluster" "cluster" {
+  name = var.cluster_name
+}
+data "aws_eks_cluster_auth" "cluster" {
+  name = var.cluster_name
+}
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
 }
 
 resource "local_file" "openwebui_values_yaml" {
