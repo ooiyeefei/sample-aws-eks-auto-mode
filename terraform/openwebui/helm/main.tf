@@ -20,6 +20,10 @@ terraform {
       source = "hashicorp/aws"
       version = ">= 5.0"
     }
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.3"
+    }
   }
 }
 
@@ -87,18 +91,13 @@ resource "rafay_workload" "openwebui_load_balancer" {
   }
 }
 
-resource "time_sleep" "wait_for_lb" {
+data "external" "load_balancer_info" {
   depends_on = [rafay_workload.openwebui_load_balancer]
 
-  # Wait for 2 minutes to give the AWS NLB time to provision.
-  create_duration = "120s"
-}
+  program = ["bash", "get-lb-hostname.sh"]
 
-data "kubernetes_ingress_v1" "openwebui_lb" {
-  depends_on = [time_sleep.wait_for_lb]
-
-  metadata {
-    name      = "open-webui-service"
-    namespace = var.namespace
+  query = {
+    namespace    = var.namespace
+    service_name = "open-webui-service"
   }
 }
