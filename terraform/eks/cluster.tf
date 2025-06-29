@@ -181,23 +181,8 @@ module "eks" {
     }
   }
 
-  tags = merge(local.tags, {
-    "kubernetes.io/cluster/${var.name}" = "shared"
-  })
+  tags = local.tags
 } 
-
-resource "aws_security_group_rule" "allow_nlb_to_nodes" {
-  security_group_id = module.eks.node_security_group_id
-
-  type        = "ingress"
-  protocol    = "tcp"
-  from_port   = 8080
-  to_port     = 8080
-
-  cidr_blocks = [module.vpc.vpc_cidr_block]
-
-  description = "Allow NLB traffic to nodes on application port"
-}
 
 ################################################################################
 # Create the Kubernetes Service Account
