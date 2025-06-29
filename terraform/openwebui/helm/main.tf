@@ -91,13 +91,20 @@ resource "rafay_workload" "openwebui_load_balancer" {
   }
 }
 
-data "external" "load_balancer_info" {
-  depends_on = [rafay_workload.openwebui_load_balancer]
+resource "time_sleep" "wait_for_lb_provisioning" {
+  depends_on      = [rafay_workload.openwebui_load_balancer]
+  create_duration = "90s"
+}
 
-  program = ["bash", "${path.module}/get-lb-hostname.sh"]
+resource "null_resource" "get_lb_hostname" {
+  depends_on = [time_sleep.wait_for_lb_provisioning]
 
-  query = {
-    namespace    = var.namespace
-    service_name = "open-webui-service"
+  provisioner "local-exec" {
+    command = "kubectl get service open-webui-service -n ${var.namespace} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' > /tmp/lb_hostname.txt"
   }
+}
+
+data "local_file" "load_balancer_hostname" {
+  depends_on = [null_resource.get_lb_hostname]
+  filename   = "/tmp/lb_hostname.txt"
 }
