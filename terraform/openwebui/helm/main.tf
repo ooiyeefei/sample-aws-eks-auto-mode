@@ -94,7 +94,7 @@ resource "rafay_workload" "openwebui_load_balancer" {
 data "external" "load_balancer_info" {
   depends_on = [rafay_workload.openwebui_load_balancer]
 
-  program = ["bash", "get-lb-hostname.sh"]
+  program = ["bash", "${path.module}/get-lb-hostname.sh"]
 
   query = {
     namespace    = var.namespace
