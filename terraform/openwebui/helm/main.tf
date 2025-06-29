@@ -95,7 +95,7 @@ resource "local_file" "load_balancer_yaml" {
 
 resource "rafay_workload" "openwebui_load_balancer" {
   depends_on = [
-    rafay_workload.openwebui_helm
+    rafay_workload.openwebui_helm,
     local_file.load_balancer_yaml
   ]
 
