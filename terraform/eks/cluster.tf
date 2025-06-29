@@ -179,6 +179,14 @@ module "eks" {
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = ["::/0"]
     }
+    ingress_from_vpc_on_8080 = {
+      description = "Allow NLB traffic to nodes on port 8080"
+      protocol    = "tcp"
+      from_port   = 8080
+      to_port     = 8080
+      type        = "ingress"
+      cidr_blocks = [module.vpc.vpc_cidr_block]
+    }
   }
 
   tags = local.tags
