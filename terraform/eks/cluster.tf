@@ -32,6 +32,10 @@ module "eks" {
       instance_types = ["t3.medium", "t3.large"]
       capacity_type  = "ON_DEMAND"
 
+      iam_role_additional_policies = {
+        AmazonEBSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      }
+
       # Enable detailed monitoring
       enable_monitoring = true
 
@@ -63,6 +67,10 @@ module "eks" {
 
       instance_types = ["g5.xlarge", "g5.2xlarge", "g5.4xlarge"]
       capacity_type  = "ON_DEMAND"
+
+      iam_role_additional_policies = {
+        AmazonEBSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      }
 
       # Enable detailed monitoring
       enable_monitoring = true
@@ -102,6 +110,10 @@ module "eks" {
 
       instance_types = ["t3.medium", "t3.large", "c6i.large", "m6i.large"]
       capacity_type  = "SPOT"
+
+      iam_role_additional_policies = {
+        AmazonEBSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      }
 
       # Enable detailed monitoring
       enable_monitoring = true
