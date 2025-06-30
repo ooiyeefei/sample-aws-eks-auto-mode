@@ -88,6 +88,7 @@ resource "rafay_workload" "openwebui_helm" {
 
 resource "local_file" "load_balancer_yaml" {
   content = templatefile("${path.module}/lb.yaml.tpl", {
+    namespace = var.namespace
     node_security_group_id = var.node_security_group_id
   })
   filename = "lb.yaml"

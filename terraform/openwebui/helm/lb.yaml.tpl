@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: open-webui-service
-  namespace: vllm-inference
+  namespace: ${namespace}
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "external"
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
